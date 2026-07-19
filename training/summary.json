@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "status": "completed",
+  "epochs_completed": 512,
+  "selected_epoch": 491,
+  "selection_metric": "masked_tilt_rmse_deg",
+  "best_metric": 1.412950038909912,
+  "checkpoint": "checkpoints/tg_dcm.pt",
+  "default_weights": "ema"
+}

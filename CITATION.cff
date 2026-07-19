@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use the code, checkpoint, or evaluation artifacts, cite this software release."
+title: "TG-DCM-PINN: Target-Gated Direction-Cosine Physics for Six-Axis Inertial Attitude Estimation"
+type: software
+authors:
+  - family-names: "Asgharpoor Golroudbari"
+    given-names: "Arman"
+    affiliation: "GinkgoQ"
+    email: "ai-team@ginkoq.com"
+version: 0.1.0
+date-released: 2026-07-19
+license: Apache-2.0
+repository-code: "https://github.com/GinkgoQ/TG-DCM-PINN"
+url: "https://github.com/GinkgoQ/TG-DCM-PINN"
+keywords:
+  - attitude estimation
+  - inertial measurement unit
+  - direction cosine matrix
+  - physics-informed learning
+  - robotics

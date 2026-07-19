@@ -1,0 +1,50 @@
+model:
+  name: tg_dcm
+  architecture: gru
+  input_channels: 7
+  output_channels: 4
+  hidden_size: 200
+  num_layers: 2
+  quaternion_order: wxyz
+  quaternion_direction: body_to_world
+
+training:
+  epochs: 512
+  seed: 42
+  batch_size: 64
+  learning_rate: 0.003
+  weight_decay: 0.01
+  pct_start: 0.15
+  window_size: 9000
+  step_size: 60
+  subsequence_length: 1800
+  train_batches_per_epoch: 300
+  target_sampling_rate_count: 427
+  cuda_graph: true
+  cudnn: true
+  bf16: true
+  ema_decay_max: 0.9999
+
+loss:
+  supervised:
+    name: tilt_charbonnier
+    inclination_weight: 1.0
+    quaternion_norm_weight: 0.01
+  target_dcm:
+    enabled: true
+    dynamics_weight: 0.10
+    gravity_weight: 0.05
+    target_gate_deg: 2.0
+    dynamics_deadzone_deg: 0.15
+    dynamics_delta_deg: 0.5
+    gravity_deadzone_deg: 0.20
+    gravity_delta_deg: 0.5
+    gravity_sigma: 0.25
+    jerk_sigma: 45.0
+    rate_sigma: 1.4
+    gate_floor: 0.0001
+
+checkpoint:
+  path: checkpoints/tg_dcm.pt
+  default_weights: ema
+  serialization: weights_only

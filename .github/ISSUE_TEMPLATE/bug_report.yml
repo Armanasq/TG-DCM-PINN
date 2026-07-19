@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible implementation, data, or evaluation defect.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include private datasets, credentials, or unpublished checkpoints.
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed behavior
+      description: Include the exact error and the affected command or API.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide the smallest command or code sample that reproduces the defect.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Report OS, Python, PyTorch, device, and package versions.
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Affected surface
+      options:
+        - Data preparation
+        - Training
+        - Checkpoint loading
+        - Evaluation
+        - Documentation
+    validations:
+      required: true

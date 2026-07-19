@@ -1,0 +1,12 @@
+{
+  "epoch": 491,
+  "lr": 1.720243681809325e-05,
+  "train_loss": 0.009632661189573507,
+  "valid_loss": 0.012239855714142323,
+  "masked_geodesic_mean_deg": 87.82171630859375,
+  "masked_pitch_rmse_deg": 1.0456265211105347,
+  "masked_roll_rmse_deg": 1.7175480127334595,
+  "masked_tilt_mean_deg": 0.7505782246589661,
+  "masked_tilt_rmse_deg": 1.412950038909912,
+  "skipped_steps": 0
+}

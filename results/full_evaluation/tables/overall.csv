@@ -1,0 +1,2 @@
+dataset,n_sequences,n_trials,tg_dcm_mean_deg,tg_dcm_median_deg,tg_dcm_p95_deg,tg_dcm_max_deg,riann_mean_deg,riann_median_deg,riann_p95_deg,riann_max_deg,vqf_mean_deg,vqf_median_deg,vqf_p95_deg,vqf_max_deg,win_rate_vs_riann_pct,mean_delta_vs_riann_deg,win_rate_vs_vqf_pct,mean_delta_vs_vqf_deg
+overall,559,223,8.2342856,1.9001749,41.388961,62.378223,8.4038511,2.559725,40.34555,61.136063,12.535111,2.6531837,45.559082,64.966164,50.447227,-0.1695655,64.937388,-4.3008251

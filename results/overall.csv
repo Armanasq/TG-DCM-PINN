@@ -1,0 +1,2 @@
+model,n_sequences,tilt_rmse_deg,riann_tilt_rmse_deg,vqf_tilt_rmse_deg,vs_riann_pct,vs_vqf_pct,roll_rmse_deg,pitch_rmse_deg,weights
+tg_dcm,559,8.234,8.404,12.535,-2.0,-34.3,12.29,5.02,ema

@@ -1,0 +1,8 @@
+dataset,n_sequences,tg_dcm_deg,riann_deg,vqf_deg,vs_riann_pct,vs_vqf_pct
+Caruso-Sassari,18,1.43,1.66,1.53,-13.7,-6.2
+Caruso-Sassari_orig,18,1.58,1.98,1.73,-20.2,-8.7
+EuRoC-MAV,6,1.66,1.53,1.67,8.5,-0.3
+Myon,3,0.67,1.09,0.76,-39.1,-12.6
+OxIOD,71,1.74,1.66,2.00,4.8,-13.4
+RepoIMU,21,0.91,1.21,1.38,-24.7,-34.3
+diodem,422,10.41,10.61,16.03,-1.8,-35.0
