@@ -933,42 +933,42 @@ applied to all raw predictions
 
 ```mermaid
 flowchart TD
-    A[IMU input: acc, gyro, dt] --> B[GRU predicts qhat_t]
-    T[Target quaternion q_t] --> C[finite target mask]
-    B --> D[normalize qhat_t for angular losses]
-    C --> E[supervised tilt error]
+    A["IMU input: acc, gyro, dt"] --> B["GRU predicts qhat_t"]
+    T["Target quaternion q_t"] --> C["finite target mask"]
+    B --> D["normalize qhat_t for angular losses"]
+    C --> E["supervised tilt error"]
     D --> E
-    E --> F[L_tilt]
-    B --> G[raw quaternion norm]
-    G --> H[L_norm]
+    E --> F["L_tilt"]
+    B --> G["raw quaternion norm"]
+    G --> H["L_norm"]
 
-    C --> I[target pair validity]
-    A --> J[gyro_step target]
-    I --> K[target propagation tilt error <= 2 deg]
+    C --> I["target pair validity"]
+    A --> J["gyro_step target"]
+    I --> K["target propagation tilt error ≤ 2°"]
     J --> K
-    K --> L[dynamics accepted mask]
-    D --> M[gyro_step prediction]
-    M --> N[DCM vertical h_prop]
-    D --> O[next DCM vertical h_next]
-    N --> P[angle and 0.15 deg deadzone]
+    K --> L["dynamics accepted mask"]
+    D --> M["gyro_step prediction"]
+    M --> N["DCM vertical h_prop"]
+    D --> O["next DCM vertical h_next"]
+    N --> P["angle and 0.15° deadzone"]
     O --> P
-    L --> Q[masked Charbonnier]
+    L --> Q["masked Charbonnier"]
     P --> Q
-    Q --> R[L_dyn]
+    Q --> R["L_dyn"]
 
-    A --> S[acc norm, jerk, gyro rate]
-    S --> U[gravity gate weight]
-    U --> V[gate weight > 1e-4]
-    D --> W[DCM vertical h_pred]
-    A --> X[normalized acceleration]
-    W --> Y[angle and 0.20 deg deadzone]
+    A --> S["acc norm, jerk, gyro rate"]
+    S --> U["gravity gate weight"]
+    U --> V["gate weight > 1e-4"]
+    D --> W["DCM vertical h_pred"]
+    A --> X["normalized acceleration"]
+    W --> Y["angle and 0.20° deadzone"]
     X --> Y
-    U --> Z[weighted Charbonnier]
+    U --> Z["weighted Charbonnier"]
     V --> Z
     Y --> Z
-    Z --> AA[L_grav]
+    Z --> AA["L_grav"]
 
-    F --> AB[L_total]
+    F --> AB["L_total"]
     H --> AB
     R --> AB
     AA --> AB

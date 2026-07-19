@@ -52,16 +52,16 @@ quaternion components.
 
 ```mermaid
 flowchart LR
-    X[IMU sequence] --> N[2-layer GRU]
-    N --> Q[Quaternion predictions]
-    Q --> H[Vertical direction h(q)]
-    Y[Target sequence] --> T{Target propagation error <= 2 deg?}
+    X["IMU sequence"] --> N["2-layer GRU"]
+    N --> Q["Quaternion predictions"]
+    Q --> H["Vertical direction h(q)"]
+    Y["Target sequence"] --> T{"Target propagation error ≤ 2°?"}
     X --> T
-    T -->|yes| D[Gyroscope dynamics loss]
-    T -->|no| Z1[Zero dynamics contribution]
-    X --> G{Gravity confidence > 1e-4?}
-    G -->|yes| A[Weighted gravity loss]
-    G -->|no| Z2[Zero gravity contribution]
+    T -->|yes| D["Gyroscope dynamics loss"]
+    T -->|no| Z1["Zero dynamics contribution"]
+    X --> G{"Gravity confidence > 1e-4?"}
+    G -->|yes| A["Weighted gravity loss"]
+    G -->|no| Z2["Zero gravity contribution"]
     H --> D
     H --> A
 ```
