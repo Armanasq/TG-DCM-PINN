@@ -117,6 +117,37 @@
       "caveat": "Transformer results cannot be independently reproduced from the public release as inspected.",
       "inspected_at": "2026-11-13",
       "local_clone": false
+    },
+    {
+      "repo": "zoujy02/MosaicIMU",
+      "revision": "e964e10b091361126d744fd3afa74e70223f42a8",
+      "license": "unknown (no root LICENSE in inspected tree)",
+      "files": [
+        "src/models/moe_net.py",
+        "src/models/blocks.py",
+        "src/models/finetune_net.py",
+        "src/utils/loss.py",
+        "src/filter/msckf.py",
+        "configs/train_config.yaml"
+      ],
+      "implementation": "DecoupledDeepIMUEncoder with depthwise residual 1D conv, prototype cosine router and Gumbel softmax, four temporal experts, shared decoder with BiLSTM velocity/variance heads, softplus variance and cloned-state IMU MSCKF. Adaptation adds new expert and small router adapter.",
+      "caveat": "No local clone or execution; source code includes future context in both prediction heads and training has carrier prior. Reported ATE/RTE not independently reproduced.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "fallow24/ros_imu_calib",
+      "revision": "918a19236cecd6a367921e44ac73958ab9fbb9c8",
+      "license": "no root license in tree; inspected C++ source/header contains BSD-style notice (2014 Pretto; 2025 Arzberger)",
+      "files": [
+        "src/calibration.cpp",
+        "src/filters.cpp",
+        "include/imu_tk/calibration.h"
+      ],
+      "implementation": "C++ Eigen/Ceres multi-position accelerometer and gyroscope calibration utilities; static-interval detection and residual optimization, intrinsic scale/bias/misalignment; used as paper-linked source context for motion acceleration compensation.",
+      "caveat": "The audited C++ files include inherited imu_tk toolkit code; do not attribute all routines solely to the 2026 paper or assume all paper compensation experiments reproduced.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
     }
   ]
 }

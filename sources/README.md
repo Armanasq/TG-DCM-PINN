@@ -4,8 +4,13 @@
 
 This folder contains **independent analytical notes** grounded in primary publications and inspected code, not copies of the authors' papers. The full-text status and exactly inspected implementation paths are recorded in the manifests. It is a curated technical research set, **not an exhaustive systematic search of all papers published in 2024–2026**.
 
+## Detailed 2024–2026 review
+
+The [eight-chapter research monograph](review/README.md) systematically covers architectures, designs, mathematics, challenges, goals, limitations, future research, and a full critical review. The corpus currently indexes **26 studies** and **10 inspected codebases**. These are reviewed reference materials, **not** independently replicated experiments.
+
 ## Structure
 
+- review/README.md: structured eight-chapter literature review and navigation.
 - papers/index.json: deduplicated bibliographic and analytical metadata with evidence status; papers/<id>.md: per-paper research notes.
 - repositories/index.json: pinned repository snapshots, inspected implementation files, declared/checked license.
 - synthesis/research-synthesis.md: analytical comparison and explicit observability/novelty boundaries.

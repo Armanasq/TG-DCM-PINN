@@ -2,6 +2,10 @@
 
 **Date:** 2026-11-13. **Primary research time filter:** calendar years 2024–2026 (first arXiv submission or peer-reviewed publication). Pre-2024 techniques (Mahony, Madgwick, VQF, RIANN, preintegration, AirIMU) may be cited as historical baselines, not counted as new contributions.
 
+## Current coverage
+
+As of 2026-11-13 the corpus contains **26** curated 2024–2026 works and **10** codebases including the target, with exact inspected paths pinned in the repository index. Source discovery is iterative and **not exhaustive**; direct attitude studies were prioritized over adjacent odometry, and publisher-abstract-only studies remain explicitly qualified. The eight technical chapters are indexed in [review/README.md](review/README.md).
+
 ## Inclusion logic
 
 1. **Direct:** raw six-axis accelerometer/gyro to tilt/roll/pitch, or six-axis filter error correction under dynamics, with or without learning.

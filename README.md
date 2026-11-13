@@ -135,6 +135,16 @@ vector figures are under [`results/full_evaluation/`](results/full_evaluation/).
 The protocol and claims boundary are documented in
 [`docs/evaluation.md`](docs/evaluation.md).
 
+## Literature research (2024–2026)
+
+The [technical literature review](sources/review/README.md) contains eight chapters covering
+architectures, design, mathematics, challenges, goals, limitations, future work,
+and a comprehensive source-critical synthesis. The [source corpus](sources/README.md)
+tracks 26 reviewed publications, 10 repository inspections, primary-source
+provenance, access limitations, and reproducibility plans. These materials are
+research notes and static code inspection, not independently reproduced paper
+benchmarks or changes to the released estimator.
+
 ## Installation
 
 Clone the repository and create an isolated environment:
