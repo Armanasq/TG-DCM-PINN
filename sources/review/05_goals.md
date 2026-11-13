@@ -1,101 +1,92 @@
-# 05 — Research goals, hypotheses, metrics and decision criteria
+# 05 · Goals — falsifiable claims and decision-grade experiments
 
-**Research program:** discover and validate algorithms that improve causal gravity-referenced attitude estimation using 6-axis accelerometer/gyroscope data. **Date cutoff:** 2026-11-13. Literature evidence guides hypotheses; no unrun experiments are marked successful. Read [architectures](01_architectures.md), [mathematics](03_mathematics.md), [challenges](04_challenges.md), and the [existing evaluation protocol](../../docs/evaluation.md).
+**Research objective:** estimate \(h_t=R_{WB,t}^{T}e_3\) from six-axis data with lower error and better failure behavior under unseen device/motion conditions. The task is **gravity-referenced tilt**, not unobservable absolute heading. Claims must survive data-protocol correction, same-input comparisons, training-seed variability and tail-risk reporting.
 
-## 1. Primary scientific objective
+## 1. Define the estimand before optimization
 
-Estimate the true world-vertical direction expressed in the sensor frame, h(t)=R_WB(t)ᵀe_z, **without magnetometer or externally supplied runtime orientation**, with statistically smaller yaw-invariant tilt error under a held-out distribution of devices and motion regimes. The objective is *not* arbitrary absolute yaw, position, or velocity; those states are not universally observable from the six-axis stream.
+For sequence \(s\), let \(\theta_{s,t}=\operatorname{atan2}(\|\hat h_{s,t}\times h_{s,t}\|,\hat h_{s,t}^{T}h_{s,t})\) in degrees and \(M_s\) its valid truth indices:
 
-The current baseline is the [released TG-DCM-PINN](../../README.md), GRU 2×200 with wxyz quaternion output and target-gated gyro / gravity auxiliary losses. Its published standard-domain 137-sequence mean is 1.521° tilt RMSE and its paired improvement against RIANN is -0.091° (95% interval [-0.147,-0.036]). DIODEM's 422 segments/86 motions have mean 10.41°, median 2.70°, p95 44.20° and max 62.38°; its clustered RIANN-difference interval includes zero. These are **released repository figures**, not independent checkpoint inference.
+\[
+r_s=\sqrt{\frac{1}{|M_s|}\sum_{t\in M_s}\theta_{s,t}^2}.
+\]
 
-**Main research goal:** improve unseen-motion p95 and raw-motion failure rate *without sacrificing calibrated uncertainty, latency and reproducibility*, while retaining or reducing the standard-domain mean. Avoid optimizing mean RMSE alone.
+A **sequence-mean** estimate is \(N^{-1}\sum_s r_s\). A **raw-motion mean** first aggregates segments of the same original recording. An **all-frame RMSE** weights long recordings and large segments more heavily. A dataset-balanced mean gives one top-level weight to each dataset. Report which one is estimated; do not interchange.
 
-## 2. Measurable research questions
+The released baseline reports standard-domain 137-sequence mean tilt RMSE 1.521° and \(\Delta_{\rm TG-RIANN}=-0.091^\circ\) (paired bootstrap interval [-0.147,-0.036]); DIODEM is 422 segments/86 original motions with mean 10.41°, median 2.70°, p95 44.20°, max 62.38°. Its grouped paired interval versus RIANN includes zero. These are **frozen reported results**, not independently recomputed in this work.
 
-| ID | Research question | Baseline to falsify | Required test | Observable outcome |
+## 2. Priority claims and failure criteria
+
+| ID | Hypothesis | Measurement | Necessary counterfactual | Fails when |
 |---|---|---|---|---|
-| G1 | Does strict time/GT integrity change training signals enough to matter? | Current prepared-data pipeline | Reprepare data with gap-aware SLERP, dt validity and frozen clock alignment | Invalid-target fraction, coverage change, paired tilt RMSE |
-| G2 | Are gyro and gravity auxiliary gates independently beneficial? | Same GRU, supervised tilt only | Factorial no-gates / gyro / gravity / both, ≥5 seeds | Paired effect by domain, p95 and gate occupancy |
-| G3 | Can lever-arm compensation recover useful gravity evidence during rotation? | Heuristic gravity confidence | Known/unknown r, sharp angular acceleration, stationary rotor test | Tilt peak, recovery, false-accept ratio |
-| G4 | Does explicit bias state outperform learned implicit memory? | Baseline GRU and augmented GRU | Constant bias, random-walk bias, held-out device, long horizon | Tilt drift, p95, bias RMSE when truth available |
-| G5 | Does S² correction improve OOD robustness and calibration? | Quaternion GRU, same sensor/context budget | Equal-compute geometric propagation + tangent residual | Tilt RMSE, NEES, NLL, runtime |
-| G6 | Does equivariant architecture improve remount invariance beyond augmentation? | Strong SO(3) augmentation baseline | Algebraic Q tests and real remounts with changed lever arm | Group-law error and physical OOD gap |
-| G7 | Do multi-carrier experts or temporal multiscale features address rare motion? | Shared causal encoder | Device/carrier held-out, same training samples and delay | Per-motion effect, router entropy, worst domain |
-| G8 | Are improvements reproducible and attributable? | Selected single released run | Multi-seed ablations, identical preprocessing, immutable artifact set | Stable effect CI, exact source-to-table mapping |
+| H0 | Existing comparisons survive protocol correction | Paired tilt effect, raw startup, DIODEM tail | No VQF backfill, no full-SO(3) secondary alignment, valid-only GT and dt | Ranking or effect disappears, or incomplete data prevents reconstruction |
+| H1 | Gyro/GT target gate helps for reasons other than excluding hard samples | Unconditional \(r_s\), gate coverage, p95 | Supervised-only, hard-gate, soft-gate, shuffled equal-occupancy mask | Benefit only on selected accepted frames |
+| H2 | Gravity gate improves robustness beyond accidental rate/device cues | Error conditional on true motion, not \(\|f\|\) alone | Constant-norm false-gravity translation; known/unknown lever arm | False confidence or OOD tail worsens |
+| H3 | Explicit bias state reduces tilt drift | Bias/time-conditioned tilt and confidence | Same GRU with realistic static/random-walk bias augmentation | No additional independent held-out benefit |
+| H4 | S² correction beats quaternion regression at equal compute | Tilt p95/mean, convergence, manifold tests | Same parameters, same past/future context, same data | Geometry adds complexity without OOD advantage |
+| H5 | Learned covariance is meaningful, not just broad | 2-D NEES, coverage/NLL/interval width, selective risk | Fixed robust covariance and calibrated ESKF | Cannot improve coverage/sharpness jointly or falsely trusts OOD |
+| H6 | SO(3)-covariance improves *actual* remount robustness | Algebraic residual and new-device error | Rotation augmentation, full-state transform test | Internal layer passes but full estimator fails |
+| H7 | Motion balancing improves the tail without label amplification | DIODEM raw-motion p95 and failed-motion rate | Raw-motion sampling, KISS-style motion GMM, randomized weights | Improvement vanishes when invalid GT and shared segments are controlled |
 
-Each question describes a **test plan**. A positive answer must be demonstrated; publication alone does not validate any new model.
+## 3. Stage 0 — repair experimental identifiability
 
-## 3. Primary and secondary metrics
+**Deliverable:** immutable evaluation protocol, not a new accuracy number. Requirements:
+- GT-invalid frames never score. All-GT-invalid recordings are excluded with reason; do not silently compare to identity.
+- Raw source time retained; no fabricated positive dt in physics losses or evaluation. Clock calibration is frozen independently of model prediction.
+- Quaternion interpolation only within uninterrupted valid GT segments; exact final/first valid timestamps supported.
+- Equal initialization and **causal** startup. Remove VQF future backfill; retain separate common burn-in analysis.
+- Secondary heading-aligned metrics use an SO(2) *yaw-only* correction or are explicitly relabeled full-orientation GT calibrated.
+- RIANN, VQF and TG record exact dt; quantify fixed-dt versus per-sample-dt discrepancies before interpreting results.
+- Per-sequence output includes original recording ID, sample rate, motion label, GT-valid fraction and source hash.
 
-### 3.1 Primary accuracy estimand
+**Go/no-go:** after fixes, recompute the released checkpoint and baseline outputs. If published comparisons cannot be reconstructed, no architecture result should supersede them without first explaining the discrepancy.
 
-For sequence s of T_s valid frames, let theta_{s,t} be geodesic angular error on S² in degrees. Then
+## 4. Stage 1 — replace paper ranking with experimental comparability
 
-    RMSE_s = sqrt( (1/T_s) sum_t theta_{s,t}² )
+Direct comparators: official RIANN, VQF6D, released TG GRU, supervised-only GRU and a faithfully implemented **six-axis** adaptive error-state Kalman filter such as [Wei 2025 RAESKF](https://doi.org/10.1016/j.measurement.2024.116097). Add [Ding 2026 CNN–BiLSTM](https://doi.org/10.1016/j.measurement.2026.122485) only with documented architecture, training source, window alignment and matched lookahead. [RCAE 2024](https://arxiv.org/abs/2401.13092) receives an external orientation measurement; odometry methods train on velocity/position. They are **not** direct headline baselines.
 
-and the primary standard-domain metric is the mean of RMSE_s over the 137 original test sequences, **not** a pooled all-frame RMSE.
+Every comparator gets identical available sensor channels, units, coordinate transform, first observation, valid GT mask, future-sample budget and per-frame prediction timing. If a filter has a legitimate warm-up requirement, report a separate fixed-time steady-state experiment for **all** methods.
 
-For DIODEM, raw-motion ID is the resampling cluster. Report (a) segment-weighted mean for comparability with released results and (b) raw-motion-balanced mean over the 86 original motions. These are different estimands and should be explicitly separated, not substituted. Bootstrap a paired mean difference against matched baselines by the correct independent group.
+## 5. Stage 2 — causal attribution rather than architectural storytelling
 
-### 3.2 Error reliability
+Use a factorial experiment with four otherwise identical GRU configurations:
+1. Supervised tilt only.
+2. Tilt + target-gated gyro.
+3. Tilt + gravity confidence.
+4. Full combined objective.
 
-Report median, p90, p95, p99 where sample count supports them, maximum per-sequence RMSE, fractions above prespecified error thresholds, and reconvergence after motion transition. Track **both** standard mean and DIODEM p95, not only aggregate percent improvement. Percent improvement must identify denominator and aggregation unit.
+Then isolate hard versus soft gyro gate, each gravity factor (norm/jerk/rate), fixed vs mass-normalized confidence, explicit gyro bias augmentation and its temporal persistence. Run ≥5 independent seeds **per configuration**, with unchanged early stopping/hyperparameter search budget. Report branch gradient magnitude, accepted sample count, effective confidence mass and unconditional error by motion severity.
 
-### 3.3 Observation quality and uncertainty
+**Reason:** physics loss can improve without changing observable state error, especially when confidence gates suppress high-error dynamics. A positive paired effect of *the full method* cannot establish that every component is beneficial.
 
-Report GT-valid fraction, target-gate accepted fraction, gravity-confidence mass, and rejected-fraction by angular acceleration/linear acceleration. If a covariance head exists, add 2-D tangent NLL, NEES expected approximately 2 only under proper calibration, uncertainty coverage at 50/90/95%, and calibration under OOD. A low NLL does not guarantee correct coverage.
+## 6. Stage 3 — mechanism-centered novelty candidate
 
-### 3.4 Causality and computational cost
+Prioritize a small causal tilt observer with:
+- explicit slow-time gyro bias estimate, with stationarity/excitation assumptions;
+- SO(3) gyro propagation mapped into a 2-D tangent correction on S²;
+- physically justified acceleration compensation only when lever arm and angular-acceleration quality are known;
+- bounded SPD 2×2 tangent covariance evaluated for calibration.
 
-At minimum, report available IMU axes, whether future samples are consumed, future-lookahead ms, sequence warm-up period, model parameters, CPU/GPU batch-1 latency, sampling frequency, peak memory and real-time factor. Learned velocity models or LiDAR-assisted methods may be included only as *transfer references*, not head-to-head tilt competitors.
+Literature controls include [RSS continuous bias NODE 2025](https://arxiv.org/html/2504.09495), [Brändle 2025](https://arxiv.org/abs/2502.03681), [Arzberger–Nüchter 2026](https://arxiv.org/html/2607.25784), [EqNIO](https://arxiv.org/html/2408.06321), and [GINIO](https://arxiv.org/abs/2609.25338). Those individual mechanisms are prior art; novelty must lie in a precisely new derivation, guarantee, interaction or experimentally verified operating regime.
 
-## 4. Dataset and protocol goals
+## 7. Statistics: three levels of uncertainty, no single magic confidence interval
 
-1. Freeze test identities and prevent training/validation contamination. The baseline [data.py](../../src/tg_dcm/data.py) uses Myon IDs, TUM-VI room splits and external held-out datasets; preserve the comparison but inspect overlap with raw motion recording IDs.
-2. Validate ground truth and timestamp alignment, including exact source endpoints and missing-data discontinuities. Record any GT-informed time-offset choice and apply one consistent protocol across all methods.
-3. Establish a direct six-axis comparison set: original TG-DCM, RIANN official, VQF6D, matched supervised GRU and a reproduced adaptive 6D ESKF. A direct 2026 CNN–BiLSTM candidate must be implemented from complete accessible methods if no code is available and evaluated at equal lookahead.
-4. Add held-out remount, known bias, nonstationary bias, deliberately invalid timestamps, irregular sampling, hard translation and nonzero sensor lever arms.
-5. Define motion taxonomies independent of the evaluated method: angular speed, angular acceleration, jerk, norm deviation, orientation speed, device mount, carrier type, raw experiment. Avoid bins chosen after seeing a favorable result.
+**Level A — test sample:** paired bootstrap over independent sequences or raw motions, fixed trained checkpoint. This is what released paired intervals primarily address.
 
-## 5. Statistical acceptance policy
+**Level B — training process:** independent random seeds, checkpoints and hyperparameter selection. A fixed-checkpoint bootstrap cannot represent this variation. Treat seed as a separate random factor.
 
-A method qualifies as an **empirical improvement** only if it meets all of the following:
+**Level C — deployment domain:** held-out devices, mounting configurations, session conditions and motion regimes. Even multiseed confidence does not imply external domain generalization if all runs share one sensor family.
 
-- Same test input modalities, initialization and future lookahead as compared baselines; no GT prediction-time information.
-- Train/validation/test group disjointness and strict separation of calibration from final test.
-- At least five independent seeds per learned configuration and unchanged hyperparameter selection budget.
-- Full paired per-sequence outputs, raw-motion cluster bootstrap confidence intervals for DIODEM and explicit reporting of uncertainty under multiple comparisons.
-- A predeclared primary measure and p95 guardrail. If the mean improves but DIODEM p95 worsens, call the method a *mean-only tradeoff*, not uniformly better.
-- Exact repository commit, checkpoint SHA256, dataset hashes, training/inference commands, frame convention, environment/dependency versions and source-to-table mapping.
+Report all three where claims concern deployment. Use original raw motion as the resampling unit for DIODEM and include both segment-weighted and equal-raw-motion estimands. For 26 paper-derived hypotheses, avoid fishing among many models on the final test; use validation-only selection or a multiplicity-aware confirmatory plan.
 
-**Predefined feasibility gates (engineering targets, not sourced published facts):** no statistically supported regression on standard-domain mean and no material p95 deterioration on DIODEM; independent multi-device improvement required before stating better generalization. The precise numerical acceptable difference should be chosen on validation and signed off before final test evaluation, not retroactively invented from observed results.
+## 8. Research gates and outputs
 
-## 6. Scientific goals versus engineering goals
+| Milestone | Required artifact | Scientific decision |
+|---|---|---|
+| M0 | Protocol diff, unit tests and new original-raw-motion data manifest | Are existing results still comparable? |
+| M1 | Same-input benchmark with raw per-frame predictions and fixed delay | Is there a genuinely stronger direct competitor? |
+| M2 | Seeded loss-component ablations and per-motion gate statistics | Does target-gating cause an unconditional gain? |
+| M3 | S²+bias+covariance candidate, OOD and adversarial tests | Is improvement mechanism-specific and identifiable? |
+| M4 | Physical remount/lever-arm sensitivity | Does symmetry hold beyond artificial coordinate rotation? |
+| M5 | Source/checkpoint/data hashes and machine-reconstructed tables | Is the claim reproducible? |
 
-**Scientific contributions** should isolate a previously unreported mechanism or validated interaction (e.g. identifiable, calibrated tangent correction; physically compensated gravity reliability under known lever arms; exact full-system gauge/remount law), derive the assumptions, prove or test an invariant, and demonstrate improvement beyond known components. **Engineering contributions** include reproducible data pipelines, robust format normalization, incremental runtime and exact evaluation. Both are valuable; neither substitutes for a demonstrably novel mathematical or empirical claim.
-
-A plausible publication must show what earlier work already contributes:
-- [Wei 2025](https://doi.org/10.1016/j.measurement.2024.116097): adaptive dynamic-acceleration filter.
-- [Brändle 2025](https://arxiv.org/abs/2502.03681): lever-arm/angular acceleration limitations and bandwidth tradeoff.
-- [Arzberger–Nüchter 2026](https://arxiv.org/html/2607.25784): motion acceleration compensation.
-- [EqNIO 2024](https://arxiv.org/html/2408.06321): gravity-aligned O(2) symmetry.
-- [GINIO 2026](https://arxiv.org/abs/2609.25338): full SO(3) equivariant networks and covariance.
-- [KISS-IMU 2026](https://arxiv.org/html/2603.06205): rare-motion weighting and learned uncertainty.
-- [MosaicIMU 2026](https://arxiv.org/html/2606.09355): carrier-specific expert composition.
-- [Ding 2026](https://doi.org/10.1016/j.measurement.2026.122485): frequency-aware CNN–BiLSTM six-axis quaternion predictor.
-
-Do not claim gravity confidence, equivariance, physics-informed losses or heterogeneous MoE architecture as new merely because combined in one project.
-
-## 7. Decision-oriented milestones
-
-**M0 — Audit:** unit/property tests for quaternion geometry, exact timestamp endpoints, missing GT spans, clock offset protocol, dt validity and consistent evaluation grouping. Deliver a clean regenerated data manifest and corrected published baseline report.
-
-**M1 — Fair direct baseline:** reproduce comparable 6D ESKF and a direct 2026 learned architecture at matched lookahead, then reconstruct standard/DIODEM per-sequence tables, with source hashes.
-
-**M2 — Attribution:** multi-seed factorial gates/uncertainty/bias experiments. Kill configurations that fail error or p95 guardrails, even if accepted-only physics loss decreases.
-
-**M3 — Mechanistic novelty candidate:** geometric S² correction with bounded covariance and/or calibrated rotational-acceleration compensation, followed by exact remount tests and OOD stress.
-
-**M4 — Publication-ready evidence:** complete mathematical statement, released reproducibility commands, ablation table, negative cases, dataset and motion-family breakdown, compute/latency and claim-to-artifact audit.
-
-Each milestone ends with a **falsifiable decision**, not a promise of improvement. Preserve the released baseline unchanged for comparison.
+**Success is not “best average.”** It is a **replicable improvement on a preregistered metric without an unacceptable DIODEM tail regression**, with known applicability conditions, calibrated uncertainty if claimed, and a coherent runtime sensor/latency contract.

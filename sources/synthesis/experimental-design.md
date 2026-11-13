@@ -52,3 +52,21 @@ Immutable source commit; environment lock; model checkpoint SHA256; dataset URI 
 ## Research claims
 
 A method is only **demonstrated** when it improves a matched, preregistered held-out metric without violating causal or observability assumptions and reproducibly passes property tests. Otherwise mark **hypothesis**, **reported by authors**, or **not independently verified**.
+
+## Protocol blockers discovered in source review (2026-11-13)
+
+Before testing a new architecture, fix or measure these benchmark differences:
+
+- VQF's first min(500,floor(T/4)) quaternions are replaced with its later estimate; provide raw causal startup and common physical-time burn-in, **never future backfill**.
+- Secondary "heading" alignment applies a GT-derived full SO(3) offset, which can remove roll/pitch error. Keep the primary raw tilt metric, and redesign or relabel these secondary results.
+- RIANN/VQF use fixed median-rate dt while TG uses recorded per-sample dt; log per-sequence dt dispersion and run matched-input sensitivity tests.
+- Exclude wholly missing GT rather than substituting identity as reference; reject silent unequal-length truncation and bad/reversed/duplicate timestamps.
+- Build NaN-safe physics losses by cleaning inputs **before** angular residuals; test 0*NaN and finite zero-norm quaternion edge cases; reject nonpositive dt before any clamp.
+- Report independent raw-motion count, sequence/segment vs raw-motion estimand, and a five-seed hierarchical experiment instead of treating a single-checkpoint bootstrap as model-training uncertainty.
+- Do not treat abs(||acc||-g) as proof of static physical motion; test sustained constant-magnitude false gravity explicitly.
+- Separate actual sample-to-output delay from model throughput and from any BiLSTM future-sample budget.
+
+The source-level audit documents **possible metric effects**, not measured corrections. Reproduce dataset incidence and per-sequence before/after tables prior to changing the research narrative.
+
+The [2025 RSS continuous bias NODE](https://arxiv.org/html/2504.09495) and [2026 empirical bias preprint](https://doi.org/10.31224/7144) strengthen the requirement to control bias-initialization provenance and label preprocessing independently of network family.
+

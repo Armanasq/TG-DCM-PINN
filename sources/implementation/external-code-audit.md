@@ -43,3 +43,21 @@ The model/net.py creates a PyPose IMUPreintegrator with covariance propagation; 
 ## Code audit is distinct from execution
 
 For every external repository inspected we captured full revision SHA and individual Python file paths. We did not resolve dependencies, execute training, download weights, hash raw datasets, run test commands, or reproduce experimental figures. No numerical metric above is labeled independently reproduced.
+
+## RSS 2025 explicit bias dynamics — deeper source check
+
+[Debiasing 6-DOF IMU via Hierarchical Learning of Continuous Bias Dynamics](https://arxiv.org/html/2504.09495) ([peer-reviewed RSS DOI](https://doi.org/10.15607/RSS.2025.XXI.009)), source [UMich-CURLY/Debias_IMU](https://github.com/UMich-CURLY/Debias_IMU/tree/7eb2afcaba71d27c9c340850c19158f33c8b2f69), MIT code license.
+
+Inspected modules:
+- BiasDy/network_for_BiadDy.py: separate gyro and accelerometer neural vector fields; SO(3) kinematics integrated with predicted bias.
+- BiasDy/Interpolation.py: backward-difference cubic-Hermite interpolation and derivatives; causal if only past samples used.
+- BiasDy/lie_algebra.py: exponential/logarithm/Jacobians and Lie-state integration helpers.
+- BiasDy/learning.py: gyro stage optimized against GT orientation and accelerometer stage against GT velocity/position, with ODE solver.
+- BiasDy/dataset.py: reference/initial-state construction.
+
+**Important input distinction:** the network does not require ground-truth *bias labels*, but pose GT and approximate bias initial conditions derived from GT pose differences remain during training. Initial bias is assumed observable from a stationary phase at deployment. Paper tests use same-sequence chronological train/validation partitions but separate unseen test sequences. The model does not fully model stochastic measurement noise. No code run or metric reproduced.
+
+## 2026 bias architecture large-scale preprint — negative-result evidence
+
+[A Large-Scale Empirical Study of Deep Learning for MEMS Gyroscope Bias Estimation](https://doi.org/10.31224/7144), **not peer reviewed**, reports 2,811 study-specific experiments and a null result for its tested SO(3) auxiliary loss. The authors report that EuRoC bias labels come from batch optimization and TUMVI angular-rate references from differentiated/smoothed pose, complicating architecture comparisons. Dataset variance contribution approximately 97% and architecture <1% are **conditional on this two-dataset design**. Full text was read through scholarly indexing; no reproducible public code artifact was verified or executed. This is a method-quality warning, not a general theorem.
+

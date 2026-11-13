@@ -148,6 +148,22 @@
       "caveat": "The audited C++ files include inherited imu_tk toolkit code; do not attribute all routines solely to the 2026 paper or assume all paper compensation experiments reproduced.",
       "inspected_at": "2026-11-13",
       "local_clone": false
+    },
+    {
+      "repo": "UMich-CURLY/Debias_IMU",
+      "revision": "7eb2afcaba71d27c9c340850c19158f33c8b2f69",
+      "license": "MIT (verified from root LICENSE)",
+      "files": [
+        "BiasDy/network_for_BiadDy.py",
+        "BiasDy/Interpolation.py",
+        "BiasDy/lie_algebra.py",
+        "BiasDy/learning.py",
+        "BiasDy/dataset.py"
+      ],
+      "implementation": "Separate controlled neural ODE networks for gyro and accelerometer biases; causal backward-difference Hermite spline; Lie-group integration on local SO(3) charts; stage-wise pose-derived supervision and short-window training.",
+      "caveat": "No local clone/solver execution; training uses pose GT and approximate bias initialization from pose increments; TUMVI training uses raw IMU with synthesized calibrated-bag timestamps per repository README. Check physical clock/time effects and OOD calibration.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
     }
   ]
 }

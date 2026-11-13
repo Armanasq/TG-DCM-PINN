@@ -1,90 +1,68 @@
-# 06 — Limitations: empirical claims, identifiability and implementation evidence
+# 06 · Limitations — exact claim boundary and evidential debt
 
-**Purpose:** document limitations that must survive the synthesis even if they weaken proposed novelty. **Reviewed range:** 2024–2026, with earlier background methods marked historical. See [challenges](04_challenges.md), [goals](05_goals.md), [full review](08_literature_review.md).
+**Purpose:** separate the limits imposed by physics, those imposed by code, and those imposed by available evidence. A mathematical impossibility is not a software bug; a source-code hazard is not evidence of a changed reported benchmark until replayed.
 
-## 1. Distinguish four evidence classes
+## 1. Structural limits no architecture can remove
 
-A **theoretical property** may be proved from a correctly defined observation model; an **author-reported experiment** may be valid but not independently replicated; an **inspected code property** follows from source-level control flow; and a **reproduced result** requires execution with matched checkpoint, dataset and metric. Do not convert one evidence type into another.
+- **Global yaw gauge.** From gravity direction and body-rate alone, \(R\) and \(R_z(\phi)R\) are observationally equivalent for constant world yaw. A quaternion network may select a training-conditioned heading representative; that is not a globally measured yaw.
+- **Translation/gravity ambiguity.** An arbitrary specific-force measurement includes unknown reference-point acceleration. Acc norm approximately g and low jerk are not evidence that it is gravity-only. A 30° false-gravity vector can have the same norm g and zero jerk/rate; see [construction](03_mathematics.md).
+- **Calibration/initialization dependence.** A bias head cannot identify every IMU nuisance variable under non-exciting motion. A known lever arm can remove rotational terms, not arbitrary translation; gyro differentiation adds noise.
+- **Domain dependence of learned motion priors.** Learned regularity of gait, drone thrust or hand motion is contingent on carrier, mounting and rate. Covariance may be overconfident after shift.
 
-A preprint DOI or public GitHub link does not guarantee accessible exact training data, numeric tables, full architecture or working checkpoints. The source corpus metadata labels access as primary sections, publisher abstract or code inspected. No 2024–2026 externally published accuracy result was independently rerun in this review.
+**Consequence:** a physically defensible paper should state the motion/inference assumptions under which it expects accuracy, not claim universal six-axis absolute orientation or indefinitely drift-free pose.
 
-## 2. Fundamental limits of inertial inference
+## 2. Directly observed target implementation risks
 
-**Absolute yaw is not identified** by gravity plus gyro readings without extra reference or restrictive motion assumptions. A full quaternion network may predict a convention-dependent heading learned from datasets, not globally observable yaw. Reference yaw-dependent geodesic loss can be unstable under unknown device mount/initial heading, even if it improves numbers on a synchronized benchmark. S² tilt loss avoids this *heading* nuisance but cannot resolve arbitrary translational acceleration.
+| Evidence source | Source-level finding | Affected claim or metric | Still unknown |
+|---|---|---|---|
+| [so3.py](../../src/tg_dcm/so3.py) | SLERP chooses neighboring **valid compressed** rows and may cross original GT gaps; exact final endpoint excluded | Training labels, gyro-reference gate and any prepared-data metric | Number of real affected frames and error change |
+| [losses.py](../../src/tg_dcm/losses.py) | dt clamped before pair validity; finite nonpositive dt can be used as tiny positive interval | Gyro physics consistency and jerk | Incidence in actual training |
+| [losses.py](../../src/tg_dcm/losses.py) | 0×NaN propagation through soft-mask reduction; finite mask calculated after some nonlinear residuals | Robustness of forward loss and gradients to invalid IMU | Whether preprocessing eliminated all such frames |
+| [losses.py](../../src/tg_dcm/losses.py) | Finite-but-zero quaternion passes target validity | Nonphysical training target and inconsistent error conventions | Presence of degenerate GT rows |
+| [evaluate.py](../../scripts/evaluate.py) | VQF initial output replaced with later orientation | Startup baseline causal semantics | How many sequences/ranks change on removal |
+| [evaluate.py](../../scripts/evaluate.py) | “Heading alignment” computes full GT-relative SO(3) correction | Secondary roll/pitch metrics use truth-derived tilt correction | Magnitude of bias in published secondary columns |
+| [evaluate.py](../../scripts/evaluate.py) | Fixed dt for RIANN/VQF, stored per-frame dt for TG | Fair comparison under jitter | Actual dt distributions |
+| [evaluate.py](../../scripts/evaluate.py) | No-valid-GT case uses an all-true mask after identity substitution; input lengths truncated to minimum | Spurious sequence score / hidden misalignment | Whether any released files trigger this branch |
+| [evaluate.py](../../scripts/evaluate.py) | “Static” is abs(acc norm−g) threshold | Static-gated metrics | Whether classified motions were truly static |
+| [data.py](../../src/tg_dcm/data.py) | Same raw training motion appears at many resampled rates | Effective data independence | Exact duplicate exposure, seed effects |
+| [train_impl.py](../../src/tg_dcm/train_impl.py) | A selected 512-epoch run, without controlled released factorial loss ablations | Contribution attribution and seed uncertainty | Variability across independent runs |
 
-**Arbitrary linear acceleration is unseparable from gravity** at one sample without a motion prior, known external state, or other measurements. A constant-magnitude vector tilted by 30° from gravity can have \(\|f\|=g\), jerk zero and gyro rate zero while dynamic acceleration produces all the difference. The current confidence gate's three inputs then all appear maximally reliable; the exact counterexample is in [math](03_mathematics.md#8-a-constructive-non-identifiability-counterexample).
+No training code was executed in this review. The numerical fact 0×NaN=NaN was verified independently with PyTorch arithmetic; the full loss-path incidence still requires targeted package tests.
 
-**Known rigid-body compensation is conditional.** [Arzberger–Nüchter](https://arxiv.org/html/2607.25784) can subtract alpha×r and omega×(omega×r) if calibration and lever arm are known/estimated. It does not remove arbitrary reference-point translation or eliminate differentiating angular rate noise. [Brändle 2025](https://arxiv.org/abs/2502.03681) shows that angular acceleration changes the filter feedback dynamics, yielding nonminimum-phase issues under some lever-arm geometry; filter gain reduction is a bandwidth-versus-disturbance tradeoff, not a universal fix.
+## 3. Published TG-DCM evidence: what follows and what does not
 
-**Aids change the problem.** [RCAE 2024](https://arxiv.org/abs/2401.13092) requires measured attitude; [Tchonkeu 2026](https://arxiv.org/abs/2607.13254) requires barometric data for its stated convergence setting; [Zhai 2026](https://doi.org/10.1016/j.measurement.2025.119824) uses angular-accelerometer fusion; [AI-IO 2026](https://arxiv.org/abs/2603.00597) uses rotor speed; [KISS-IMU](https://arxiv.org/html/2603.06205) trains from LiDAR-generated labels. None is a strict raw-six-axis baseline by default.
+**Released standard result:** 137 sequences, mean tilt RMSE 1.521°, paired mean difference from RIANN -0.091°, 95% sequence bootstrap interval [-0.147,-0.036]. This supports a **fixed checkpoint's aggregate mean** on the named standard split, conditional on current data/evaluation protocol. It does not prove that the gate, the optimizer, the interpolation changes, or the model family caused the effect. It does not include run-to-run confidence.
 
-## 3. Limitations of TG-DCM-PINN, established by its own released results
+**DIODEM:** 422 segments derived from 86 raw motions; mean 10.41°, median 2.70°, p95 44.20°, max 62.38°. Clustered paired mean difference CI versus RIANN includes 0. Thus a resolved DIODEM mean advantage is **not** shown at 95%; tail failure is prominent. Segment-level p95 cannot be reported as a frame-level p95. A raw-motion-balanced analysis might alter the weighting even when bootstrap clustering is correct.
 
-| Constraint | Evidence | Consequence |
-|---|---|---|
-| Only one selected training seed / run; no controlled component ablations | [training/summary.json](../../training/summary.json) and [README](../../README.md) | Cannot assign aggregate gain causally to specific gate, loss or optimizer |
-| Standard split 137-sequence mean gain small | 1.521° tilt RMSE; mean paired -0.091° vs RIANN; CI [-0.147,-0.036] | Supports this sampled mean, not uniform superiority, device-invariance or a novel principle |
-| DIODEM heavy tail | 422 segments/86 motions, mean 10.41°, median 2.70°, p95 44.20°, maximum 62.38° | Rare severe failures dominate deployment risk despite modest central tendency |
-| DIODEM mean difference inconclusive | Paired clustered RIANN delta -0.195°, 95% [-0.440,+0.043] | 95% interval includes zero; do not claim resolved improvement on DIODEM |
-| Correlated DIODEM segments | Five-ish segments derived from shared raw motions | Treat 86 raw motions as bootstrap clusters; do not claim 422 independent sequences |
-| Domain-specific optimization and data split | Myon/TUM-VI train, external datasets test; multi-frequency resampling | Training diversity does not guarantee all mounts, rates or distributions |
-| No runtime physics-constrained update | Inference GRU emits quaternion only | Training-time consistency may fail OOD at runtime |
-| Static norm/jerk/rate gravity trust | [losses.py](../../src/tg_dcm/losses.py) | Cannot distinguish every gravity-ambiguous acceleration |
-| Confidence loss denominator = count, not weight mass | [losses.py](../../src/tg_dcm/losses.py) | Effective branch gradient scale changes with confidence weights; not necessarily a bug |
-| 2° GT target gate | [losses.py](../../src/tg_dcm/losses.py) | Excludes label-discrepant and potentially difficult fast transitions from dynamics supervision |
-| No independently verified released raw-data re-execution | Dataset not redistributed | Published results are not yet reproduced in this review |
+**Inference speed:** the current evaluation times different backends on different processing devices and may run them concurrently; it is not a same-hardware sample-to-output latency comparison. An early-output VQF backfill also means its reported startup accuracy is not causal.
 
-## 4. Target implementation defects that affect evidential integrity
+## 4. Key paper-specific limitations from method and artifact inspection
 
-**Interpolation across invalid GT.** The [interpolate_quat](../../src/tg_dcm/so3.py) implementation compacts finite rows, then selects adjacent entries of the compact array. If original data contain valid–NaN–valid, the middle query may receive a smooth SLERP orientation despite absent source truth. A nominal “gap-aware” description is not an adequate substitute for gap-segment tests. The exact last timestamp of a valid sequence is also excluded by the current right-bound check. These are direct control-flow findings; their effects on the released result tables are **unknown until datasets are regenerated and comparisons rerun**.
+**[Wei et al., RAESKF 2025](https://doi.org/10.1016/j.measurement.2024.116097):** adaptive covariance/acceleration compensation is a direct physical baseline, but detailed filter tuning, threshold sensitivity and full experimental tables were unavailable in the accessible publisher material. The reported pitch/roll percentage gains cannot be transferred to this dataset.
 
-**Invalid dt accepted after clamp.** In [TargetDCM3Loss.forward](../../src/tg_dcm/losses.py), raw dt is clamped before the finite target pair filter. Finite nonpositive dt thus becomes 1e-6 and may enter apparent gyro dynamics and acceleration jerk calculations. Verify path for NaN/Inf explicitly, then reject nonpositive intervals without silently modifying physics.
+**[Ding et al., 2026](https://doi.org/10.1016/j.measurement.2026.122485):** direct six-axis CNN–BiLSTM, frequency encoding and QSGD loss. Publisher content establishes a future-frame latency tradeoff, not a zero-lookahead result; median full-angle errors are not sequence tilt RMSE. Full trainable code and exact splits were not verified. A [2023 CNN–BiLSTM six-axis paper](https://doi.org/10.1016/j.measurement.2023.113105) is essential prior art.
 
-**Ground-truth-dependent offset.** The [time-offset optimizer](../../src/tg_dcm/so3.py) selects a shift by minimizing GT-vs-gyro propagation disagreement. This can be an appropriate calibration method, but if used independently on test truth it must be disclosed and held identical for all baselines; otherwise the benchmark may become conditional on post hoc test-label alignment. An explicit contamination claim requires tracing the actual preparation/evaluation calls.
+**[Liu et al., RSS 2025](https://arxiv.org/html/2504.09495):** continuous bias NODE avoids direct bias labels but still relies on pose GT to train, approximate bias initialization from pose differences and stationary calibration for startup. The initial training/validation split uses adjacent portions of the same recordings, while held-out test recordings are separate. Noise is not fully modeled. [Actual code](https://github.com/UMich-CURLY/Debias_IMU/tree/7eb2afcaba71d27c9c340850c19158f33c8b2f69/BiasDy) confirms a backward cubic Hermite spline, separate bias nets and Lie ODE integration. Causal inference and **online bias identifiability under arbitrary motion** are different claims.
 
-**Artifact identity ambiguity.** The currently accessible repository path is Armanasq/TG-DCM-PINN, while [README](../../README.md) badges and [pyproject.toml](../../pyproject.toml) homepage identify GinkgoQ/TG-DCM-PINN. Track which source, tag, branch, release and checkpoint SHA were actually evaluated.
+**[Tsai/Chung preprint, 2026](https://doi.org/10.31224/7144):** 2,811 experiments, roughly 97% dataset contribution to variance and under 1% architecture in the authors' specific two-dataset bias task, and no gain from one SO(3) regularization tested. This is **not peer-reviewed** and the label sources differ substantially between EuRoC and TUM-VI. It is a valuable methodological warning, not a general theorem that neural architecture never matters.
 
-**Test gaps.** Current [tests/test_losses.py](../../tests/test_losses.py) covers basic quaternion vertical, zero qexp, selected dynamics gate and gravity magnitude cases. It does not cover the failure modes above, counterexamples under \(\|a\|=g\), covariance behavior, group equivariance or raw-motion resampling. The absence of tests is not a demonstration that every edge case fails, but means the claims lack regression protection.
+**[TransIMU, 2025](https://doi.org/10.1002/rob.70082):** the publisher abstract compares 1.56° proposed orientation error against 1.49° Gyro-Net and calls the proposed model superior. Under a lower-is-better shared metric that comparison is inconsistent. The underlying table/definition may clarify it; the review must not repair it by guessing.
 
-## 5. Limitations of direct contemporary attitude studies
+**[EqNIO 2024](https://arxiv.org/html/2408.06321):** O(2) symmetry is constructed **after gravity alignment** and used for displacement/covariance, not raw-six-axis tilt. A gravity estimate from the current filter is an input dependency; the group law is not automatically full physical mounting robustness.
 
-**Wei et al. 2025 RAESKF:** the publisher accessible summary describes covariance switching/compensation and relative pitch/roll gains. Full equations, test devices, rate, computational cost and raw trajectories were not accessible in this review, so its exact comparability and reproducibility remain open. Claims of a fixed percent improvement cannot be transferred to different hardware.
+**[GINIO 2026](https://arxiv.org/abs/2609.25338):** the vector-neuron mechanism is meaningful, but the [maintained author-side known-issues document](https://github.com/chankyo123/ginio/blob/6b97f178be1a253ef44e9a05ed17432b41c00287/docs/KNOWN_ISSUES.md) reports unsupported spectral NLL/NEES values, a model labeled with LFA trained without it, mixed trained/zero-shot comparisons and physical remount non-equivariance of an added attitude channel. These are author-maintained artifact assertions, not independently replayed archives. Do not repeat the paper's affected rows as verified benchmark wins.
 
-**Ding et al. 2026 six-axis CNN–BiLSTM:** primary abstract/extended publisher preview describes three architecture features and median errors; detailed methods and code unavailable here. A BiLSTM may use future samples, and full-quaternion geodesic supervision depends on yaw treatment. Its median angle is **not** the same statistic as TG-DCM sequence-level tilt RMSE. Do not claim an exact winning model from the current evidence.
+**[Tartan IMU 2025](https://openaccess.thecvf.com/content/CVPR2025/html/Zhao_Tartan_IMU_A_Light_Foundation_Model_for_Inertial_Positioning_in_CVPR_2025_paper.html):** [public transformer.py](https://github.com/superxslam/TartanIMU/blob/8a8025000f85d2c6b0692b88e15c2c91e761f7d7/tartan_imu/model/backbones/transformer.py) explicitly raises NotImplementedError. Its full Transformer result cannot be reproduced from the inspected release alone.
 
-**Ye et al. 2025 gyro transformer:** public abstract reports a mean orientation error 1.56° for the proposed method versus 1.49° for Gyro-Net, while describing the proposed result as better. If both are lower-is-better degrees for the same metric, this is arithmetically inconsistent. It might reflect a typographical error or different evaluation context; without full per-sequence outputs and method definitions, neither interpretation may be silently selected. [Primary source](https://doi.org/10.1002/rob.70082).
+**[KISS-IMU 2026](https://arxiv.org/html/2603.06205):** LiDAR ICP/pose graph supplies the training teacher; “self-supervised” does not mean training without a secondary modality. Pseudo-label corruption can be amplified by rare-motion weights.
 
-**Oveissi et al. 2024 retrospective-cost:** orientation observations are a core input; treating it as pure accelerometer+gyro performance would be a sensor-budget error. [Source](https://arxiv.org/abs/2401.13092).
+**[MosaicIMU 2026](https://arxiv.org/html/2606.09355):** prototype experts are conditioned on carrier statistics. The inspected [MoE model](https://github.com/zoujy02/MosaicIMU/blob/e964e10b091361126d744fd3afa74e70223f42a8/src/models/moe_net.py) uses bidirectional temporal heads; paper limitations include unfamiliar carrier, mount/bias conditions and adaptation supervision. Mean ATE gains coexist with carrier-specific losses.
 
-## 6. Limitations of transferable odometry and representation methods
+**[Arzberger–Nüchter 2026](https://arxiv.org/html/2607.25784):** lever-arm compensation requires estimated geometry, angular acceleration and trustworthy calibration; unknown translational acceleration remains.
 
-**EqNIO:** its O(2) symmetry assumes a gravity-aligned input supplied from a filter; it is not a proof of general arbitrary remount robustness when gravity itself is inaccurate. Distinguish reflections from proper rotations: gyro is an axial vector and must receive det(Q) parity. [Paper](https://arxiv.org/html/2408.06321), [inspected implementation](https://github.com/RoyinaJayanth/EqNIO/tree/97b7a60a5e5cc8f0132bba343c83de114211f827).
+## 5. Review-specific limitations and reproducibility
 
-**GINIO:** the original authors' [KNOWN_ISSUES.md](https://github.com/chankyo123/ginio/blob/6b97f178be1a253ef44e9a05ed17432b41c00287/docs/KNOWN_ISSUES.md) is a serious evidence warning:
-- Spectral/NLL published NLL -1.875, NEES 2.974 do not correspond to the known measured source; audit says NLL -0.8747 and NEES 6.774.
-- GINIO-RS row labeled body+LFA uses a checkpoint trained without LFA.
-- GINIO-E NanoBench score is from a TLIO-trained model evaluated zero-shot while another comparison row was NanoBench-trained; the training protocol was not labeled accordingly.
-- With-attitude Log(R) does not satisfy correct physical remount equivariance even when its vector-neuron core is equivariant.
-- Some rotation-sweep cells have no regenerating script or mix checkpoints from different epochs.
+This is a source-backed targeted research synthesis, **not an exhaustive systematic or reproduced meta-analysis**. Some papers were read in full via open HTML/PDF text, others only via publisher preview. GitHub files were inspected at pinned revisions; local cloning was blocked by unavailable GitHub DNS in the execution environment and third-party training/checkpoint execution was not performed. A source-level bug report is separate from a confirmed change in benchmark statistics. Paper registries record access status; no paywalled content is represented as fully read.
 
-These are **claims in the repository authors' own erratum worklist**, not independently verified by rerunning their historical servers. They invalidate treating the printed metrics as transparently reproducible, but do not invalidate all GINIO architectural results.
-
-**TartanIMU:** the paper reports several model/transfer features. Public [transformer.py](https://github.com/superxslam/TartanIMU/blob/8a8025000f85d2c6b0692b88e15c2c91e761f7d7/tartan_imu/model/backbones/transformer.py) explicitly raises NotImplementedError because the Transformer core is not in the inspected LSTM-only release. Its architecture cannot be assumed replicated from this code.
-
-**MosaicIMU:** in its [paper](https://arxiv.org/html/2606.09355), an average ATE gain coexists with a quadruped test case worse than TLIO; authors cite unseen carriers, severe bias changes, unusual mounting and unassisted early adaptation as residual challenges. [Code](https://github.com/zoujy02/MosaicIMU/blob/e964e10b091361126d744fd3afa74e70223f42a8/src/models/moe_net.py) contains BiLSTM heads; true streaming delay/latency remains to be measured with an explicit output policy. A zero-lookahead claim would be unsupported.
-
-**KISS-IMU:** pseudo-targets use LiDAR ICP/PGO at training, so “self-supervised” is not “no external modality ever”; pose-graph and ICP failure transfer to the labels. [Paper](https://arxiv.org/html/2603.06205).
-
-**DPI-LSTM and MoRPI-PINN:** authors report strong positional metrics on bounded UAV or specific mobile robot trajectories using initial conditions and motion assumptions. These are not demonstrations of fully unassisted global position observability nor of a superior yaw-free tilt estimator. [DPI-LSTM](https://doi.org/10.3390/s26134287), [MoRPI](https://doi.org/10.1038/s41598-026-50630-y).
-
-## 7. Methodological and review-scope limitations
-
-This corpus is a **deep curated technical review**, not a claim to have enumerated every relevant paper after 2024. Scholarly search indexes may omit preprints, append articles not matching DOI publication years, return stale versions or omit negative studies. Paywalled publisher pages may expose only abstract and metadata. arXiv HTML conversion can omit figures/appendices. GitHub connector inspection confirms code content at named revisions but not installed dependencies, runtime tests, checkpoint availability, full training invocation, or matching paper numbers. No external repository was cloned locally or trained during this phase; network-connected acquisition remains a separate repeatable command.
-
-Additional uncertainties to resolve: confirm all author/DOI metadata, verify any “best” percentage against complete per-sequence records, match reviewer-independent real datasets, inspect paper appendices and licensing for copied full text, and benchmark direct 6D attitude competitors at common delay. Keep every unknown visible instead of replacing it with optimistic assumptions.
-
-## 8. Claim boundary
-
-The currently supported TG-DCM contribution claim is a **training objective with target-gated gyro consistency and confidence-weighted gravity alignment**, evaluated against RIANN/VQF on reported splits. A small standard-domain mean improvement is documented. Component attribution, universal physical consistency, accurate absolute yaw, all-domain dominance, confidence calibration, and novelty relative to every 2024–2026 related method **are not established**.
-
-The scientifically useful result of the review is a prioritized falsification program, not an unconditional assertion of novelty. See [goals](05_goals.md) and [future research](07_future_works.md).
+**Publication boundary:** at present a defensible claim is “target-gated tilt-oriented recurrent supervision with a reported modest standard-domain improvement.” Universal acceleration rejection, calibrated runtime confidence, exact full-system equivariance, strong OOD tails, independently reproduced external baselines and novelty of every component **are not demonstrated**.

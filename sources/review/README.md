@@ -1,42 +1,30 @@
-# Deep technical research review: 2024–2026
+# Research review · 2024–2026
 
-**Project:** TG-DCM-PINN, gravity-referenced attitude from a six-axis IMU. **Evidence cutoff:** 2026-11-13. **Coverage:** **26 curated post-2023 publications** with individual paper notes, and **10 source repositories** with commit-pinned inspection logs (including the target). **Status:** literature/mathematics and static code review completed; external experiments have **not** been independently reproduced.
+**Target:** TG-DCM-PINN six-axis, yaw-invariant tilt. **Cutoff:** 2026-11-13. **Corpus:** [28 papers](../papers/index.json), [11 pinned implementation reviews](../repositories/index.json). **Evidence class:** primary paper or abstract, static inspected code, analytical derivation, and separately marked reproduced results. Third-party metrics have **not** been reproduced.
 
-## Read in this order
+| Chapter | Research question |
+|---|---|
+| [01 · Architectures](01_architectures.md) | Which designs add an observable measurement, which add only an inductive bias, and which silently use more sensors or future frames? |
+| [02 · Design](02_designs.md) | Can a benchmark compare methods when startup, GT alignment, and timestamps differ? |
+| [03 · Mathematics](03_mathematics.md) | What does six-axis physics identify, and where do the exact losses/masks fail? |
+| [04 · Challenges](04_challenges.md) | Which failure mechanism dominates, and what experiment distinguishes causes? |
+| [05 · Goals](05_goals.md) | What falsifiable improvements and statistical estimands justify research claims? |
+| [06 · Limitations](06_limitations.md) | What is mathematically impossible, source-level hazardous, or not experimentally verified? |
+| [07 · Future work](07_future_works.md) | Which mechanism-specific hypotheses deserve a controlled trial, and when should they be rejected? |
+| [08 · Critical literature review](08_literature_review.md) | How do 2024–2026 papers actually work, what assumptions buy their reported gains, and what does the code release support? |
 
-| Chapter | Scope | Key deliverable |
-|---|---|---|
-| [01 — Architectures](01_architectures.md) | Current filter, direct GRU/CNN–BiLSTM, learned inertial measurement, SO(3) networks, MoE | Side-by-side method and input-budget matrix |
-| [02 — Designs](02_designs.md) | Frame/time contracts, data lifecycle, gates and uncertainty, streaming and evaluation | Design rules and matched-baseline protocol |
-| [03 — Mathematics](03_mathematics.md) | SO(3), S² gauge, quaternion losses, gyro kinematics, noise, covariance, equivariance | Actual TG-DCM objective and constructed identifiability counterexample |
-| [04 — Challenges](04_challenges.md) | Ambiguity, acceleration, gyro bias, OOD, GT corruption, long-tail, publication artifact gaps | Failure mechanisms and adversarial tests |
-| [05 — Goals](05_goals.md) | Research objectives, estimands, metrics and falsification gates | Testable hypotheses and milestone decisions |
-| [06 — Limitations](06_limitations.md) | Fundamental, paper-specific and target source code limitations | Claim boundary and evidence grading |
-| [07 — Future work](07_future_works.md) | Prioritized novel hypotheses and dependencies | Mechanism, assumptions, experiments and reject criteria |
-| [08 — Comprehensive literature review](08_literature_review.md) | Chronological 2024/2025/2026 primary-method review and critical synthesis | Detailed comparative research chapter, citations and reproducibility program |
+## Non-obvious findings
 
-## Canonical provenance
+**Benchmark:** VQF startup is replaced by later orientation; “heading” alignment uses GT-derived **full SO(3)** correction in secondary roll/pitch; RIANN and TG use different timestep representations; all-invalid GT can be scored against identity. The primary raw yaw-invariant tilt metric is separate from the GT-aligned secondary metrics.
 
-- [Paper registry](../papers/index.json) — 26 deduplicated entries; each includes title, authors, DOI/arXiv, evidence-access status, research problem, mathematics, claims, limitations and its individual Markdown note in [papers/](../papers/).
-- [Inspected implementation index](../repositories/index.json) — 10 repositories with immutable commit SHA, exact Python/C++ files examined, and licensing notes when available.
-- [Target source inspection](../implementation/target-audit.md) — released TG-DCM computations and code-level tests to implement.
-- [External source inspection](../implementation/external-code-audit.md) — code-versus-paper boundaries and author-reported errata.
-- [Experimental design](../synthesis/experimental-design.md) — proposed reproducibility, grouped statistics, paired effects, latency and ablation controls.
-- [Research methodology](../methodology.md) — inclusion, review evidence levels, cross-source verification and legal-access boundaries.
-- [Acquisition tool](../tools/acquire.py) — reproducible retrieval plan for downloadable sources and checked-out revisions; not proof of files already acquired.
+**Loss:** masked residuals can remain NaN because 0×NaN=NaN; finite zero-norm quaternion is not valid SO(3); target-consistency gating selects a conditional subset of physical transitions; confidence-weighted gravity loss is normalized by accepted-frame count, so its effective coefficient changes with mean confidence.
 
-## Interpretation standard
+**Physics:** accelerometer magnitude equal to gravity and zero jerk do not establish a correct gravity direction. An S² estimator cannot eliminate arbitrary linear-acceleration ambiguity or global yaw gauge.
 
-The research objective is yaw-invariant tilt, not unobservable absolute yaw. **Do not compare** position/velocity trajectory ATE with sequence tilt RMSE, a bidirectional window with a causal single-sample estimator at different delay, or IMU-only inference with an aided training and runtime sensing setup without disclosure. The current evidence contains *inspected code*, *source-derived geometry* and *author-reported experimental metrics*; it does **not** contain independent confirmation of third-party paper results, cloned original repositories, new TG-DCM training runs or full licensed-paper mirrors.
+**Research evidence:** a 2025 RSS explicit-bias Neural ODE still uses pose GT and pose-derived bias initialization; a 2026 *preprint* reports label/data quality dominating architecture in its specific bias experiments. GINIO's own issue log identifies paper-to-artifact mismatches. None of these results should be generalized beyond its observation model.
 
-## Most important conclusions
+## Audit references
 
-1. Sensor/frame/timing and label integrity must be fixed before interpreting small neural gains. The target [SLERP interpolation](../../src/tg_dcm/so3.py) can bridge invalid reference gaps and reject exact final timestamps; its [physics loss](../../src/tg_dcm/losses.py) clamps nonpositive dt before physically validating time intervals.
-2. Accelerometer magnitude, jerk and angular-rate confidence **cannot guarantee** valid gravity under arbitrary translation. The [mathematics chapter](03_mathematics.md) provides an explicit constant-magnitude/zero-jerk false-gravity construction.
-3. The strongest new direct baseline is the [2026 six-axis CNN–BiLSTM](https://doi.org/10.1016/j.measurement.2026.122485), but its future context and quaternion/yaw supervision require a matched evaluation. Adaptive 6D ESKF is a complementary classical comparator.
-4. [EqNIO](https://arxiv.org/html/2408.06321), [GINIO](https://arxiv.org/abs/2609.25338), [KISS-IMU](https://arxiv.org/html/2603.06205) and [MosaicIMU](https://arxiv.org/html/2606.09355) contribute transferable symmetry, confidence, motion balance and domain-generalization mechanisms. Their published odometry accuracy is **not direct evidence** of tilt superiority; GINIO's own code repository also documents paper-to-checkpoint discrepancies.
-5. The most defensible new research track is a **causal S² tilt observer with explicit gyro bias, calibrated two-dimensional uncertainty and optional physically supported rotational-acceleration compensation**, but this is a hypothesis requiring experiments and exhaustive close-prior-art checks.
+[Target source findings](../implementation/target-audit.md) · [External code inspection](../implementation/external-code-audit.md) · [Research experiment protocol](../synthesis/experimental-design.md) · [Access and provenance rules](../methodology.md) · [Acquisition script](../tools/acquire.py).
 
-## Maintenance
-
-Keep the eight chapters synchronized by stable links into the canonical paper and repository registries. Expand evidence **only after** retrieving/inspecting the new primary source and annotating access status; never silently reinterpret a publisher abstract as full-text evidence. For every claimed improvement supply source commit, dataset hashes/partitions, model checkpoint SHA256, per-sequence outputs, and raw-motion-level confidence intervals. Preserve negative findings and quality-control counterexamples.
+**Workflow:** repair experiment integrity → run identical direct six-axis baselines → seeded ablations → device/motion-held-out stress → evaluate bounded S²/bias/uncertainty proposals. Do not equate a lower conditional loss, a stronger odometry ATE, or a more complex backbone with novel tilt estimation.

@@ -4,7 +4,7 @@
 
 ## Current coverage
 
-As of 2026-11-13 the corpus contains **26** curated 2024–2026 works and **10** codebases including the target, with exact inspected paths pinned in the repository index. Source discovery is iterative and **not exhaustive**; direct attitude studies were prioritized over adjacent odometry, and publisher-abstract-only studies remain explicitly qualified. The eight technical chapters are indexed in [review/README.md](review/README.md).
+As of 2026-11-13 the corpus contains **28** curated 2024–2026 works and **11** codebases including the target, with exact inspected paths pinned in the repository index. Source discovery is iterative and **not exhaustive**; direct attitude studies were prioritized over adjacent odometry, and publisher-abstract-only studies remain explicitly qualified. The eight technical chapters are indexed in [review/README.md](review/README.md).
 
 ## Inclusion logic
 

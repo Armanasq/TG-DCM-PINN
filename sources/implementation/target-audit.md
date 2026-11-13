@@ -35,3 +35,23 @@ Gravity branch: w_g=exp(-(norm(a)-g)^2/(2 sigma_a^2))*exp(-jerk^2/(2 sigma_j^2))
 - README.md: claims and per-dataset reported results.
 
 **Verification status:** static source inspection. Tests, model re-inference, and raw-data replay not executed. The above bugs are actionable hypotheses until a regression test reproduces them under the real package.
+
+## Additional high-priority evaluation and masking audit (2026-11-13)
+
+These extend the preceding source-level findings. No changed benchmark numbers are asserted before raw-file replay.
+
+1. **P0 — NaN propagation despite masks.** In src/tg_dcm/losses.py, masked_mean computes sum(values * mask); a false mask does **not** prevent 0*NaN=NaN when target gyro or gravity residual is already invalid. Residuals/normalization are formed before masking. PyTorch scalar arithmetic verified separately. Before computing nonlinear residuals, substitute finite neutral values for invalid inputs and exclude the originals with explicit masks. Test forward **and backward** with NaN/Inf in gyro, acceleration and GT.
+2. **P0 — invalid finite quaternions.** finite_target_quat checks only component finiteness. All-zero target quaternions pass even though their norm is zero; subsequent normalization is not a valid SO(3) attitude. Require finite norm above tolerance and record rejection counts.
+3. **P0 — VQF noncausal initialization.** scripts/evaluate.py run_vqf uses warmup=min(500,len(q)//4), then q[:warmup]=q[warmup:warmup+1]. This backfills earlier timestamps from a **later estimate**. Compare raw VQF startup against a separate common fixed-time burn-in of all methods.
+4. **P0 — secondary metric GT calibration mislabeled as heading-only.** scripts/evaluate.py align_heading averages R_GT*R_est^(-1) as a **full 3D rotation**, then applies it before roll/pitch RMSE. This can remove true roll/pitch bias. Primary yaw-invariant tilt is evaluated **without** this correction; distinguish its validity from the secondary GT-aided columns.
+5. **P1 — input timestep parity.** run_riann_onnx supplies constant 1/fs; VQF is configured at 1/fs; TG-DCM run_model uses stored dt. Actual impact depends on sequence time irregularity, which is not measured here.
+6. **P0 — wholly invalid GT can receive a score.** validate_sequence replaces invalid quat rows with identity; evaluate_sequence uses an all-true mask if no valid GT remains. Such sequences are unscorable, not identity-ground-truth tests. Stream length uses min() truncation, which can hide alignment faults.
+7. **P1 — invalid DIODEM dt imputation.** load_h5 replaces nonfinite or nonpositive timestamp increments with median valid dt before subsequent checks. Keep original timestamps, report integrity, and reject impossible transitions instead of fabricating a valid physical interval.
+8. **P1 — “static” condition is only near-g magnitude.** is_static uses |norm(acc)-9.81| threshold; translational accelerations can pass. Rename conditional metric or provide independent static-motion truth.
+9. **P1 — runtime timings across unequal compute.** Baselines run on CPU; TG-DCM can run CUDA; execution may overlap. Report same-device sequential latency and actual future/lookahead cost before speed ranking.
+10. **P1 — empirical effective diversity.** data.py creates correlated 50–500Hz resampling views of the same train motions. Split by original device/recording, distinguish held-out sampling-rate generalization from genuine motion/device OOD.
+
+**Mathematical counterexample:** f=g(sin30deg,0,cos30deg) with omega=0 and constant f gives magnitude/jerk/rate confidence exactly 1 while gravity is 30deg away. See [mathematical audit](../review/03_mathematics.md). No claim is made that this exact motion appears in the released benchmark.
+
+**Evidence standard:** static code-path finding != observed numerical bias. Required follow-up: regression tests, raw-data incidence counts and per-sequence before/after paired effect estimates. The previous single-seed aggregate result cannot attribute a gain to a particular component.
+
