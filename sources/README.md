@@ -6,7 +6,7 @@ This folder contains **independent analytical notes** grounded in primary public
 
 ## Detailed 2024–2026 review
 
-The [eight-chapter research monograph plus a separate second-pass verification](review/README.md) systematically covers architectures, designs, mathematics, challenges, goals, limitations, future research, and a full critical review. The corpus currently indexes **32 studies** and **12 inspected codebases**. These are reviewed reference materials, **not** independently replicated experiments.
+The [eight-chapter research monograph plus a separate second-pass verification](review/README.md) systematically covers architectures, designs, mathematics, challenges, goals, limitations, future research, and a full critical review. The corpus currently indexes **38 studies** and **12 inspected codebases**. These are reviewed reference materials, **not** independently replicated experiments.
 
 ## Structure
 
@@ -41,3 +41,7 @@ Primary task is yaw-invariant tilt RMSE in degrees. Velocity, position, trajecto
 Add a stable ID in papers/index.json (arXiv ID preferred, else DOI-derived slug), a corresponding note, and any inspected Git code with a pinned revision. Do not add the same work under both arXiv and journal DOI as two independent papers. Add reproducibility artifacts only after running and logging exact commands, dependency versions, dataset hashes, label frame conventions and model checkpoint SHA256.
 
 The [second-pass verification program](tools/verify_result_sensitivity.py) recomputes results/CSV-level deduplication and DIODEM clustering independently of the target model. It does **not** verify the unreleased HDF5 input contents or regenerate neural predictions.
+
+## New method investigation
+
+[Closure-constrained tilt research proposal](proposals/README.md): derivation, conditional physical bounds, 2013–2026 closely related methods, strict acceptance/rejection experiments, and [synthetic physics verification](tools/verify_motion_closure.py). This is a hypothesis, not a validated model or published method.

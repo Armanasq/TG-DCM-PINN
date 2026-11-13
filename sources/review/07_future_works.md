@@ -95,3 +95,12 @@
 **F4 — prior-art differentiation:** [RSS 2025 bias dynamics](https://doi.org/10.15607/RSS.2025.XXI.009), [2025 optical-flow body-gravity observer](https://arxiv.org/abs/2508.21163), [2026 reduced gravity observer](https://arxiv.org/abs/2609.26612), and [2026 nonlinear geometric VIO observer](https://arxiv.org/abs/2601.07156) already establish bias dynamics and body-gravity geometric state under their own sensor assumptions. A new six-axis S² observer needs a specific novel update/uncertainty/identifiability result and independent positive tests, not a new name.
 
 Prioritize F0–F3 over adding Transformer, MoE or more loss terms. [Evidence and sensitivity analysis](09_second_pass_verification.md).
+
+
+## Highest-priority new hypothesis: finite-window motion closure
+
+[Candidate method](../proposals/01_closure_constrained_tilt.md) derives an S² gravity constraint from **bounded sensor-point velocity change** over a window, avoiding an instantaneous near-gravity assumption. A causal learned six-axis event head may propose windows but **cannot certify** true closure under unrestricted translation. The mathematical containment theorem is strictly conditional on an independently justified bound.
+
+The key test regime is **high intermediate acceleration with equal but nonzero endpoint world velocity**, against an ESKF with exactly the same motion-closure event and preintegrated measurement. Standard preintegration, ZUPT and set-valued attitude observers are strong prior art: [novelty audit](../proposals/02_prior_art_and_novelty.md). A synthetic test confirms interval cancellation despite 41.88-degree peak instantaneous apparent gravity error, while an invalid-closure example returns 30-degree false tilt despite zero integrated norm residual. Neither is real model performance.
+
+**Decision:** finish the P0 benchmark/data audit; measure genuine sensor-velocity closures in independently instrumented dynamic recordings; only then train a closure event detector. If true episodes are rare or out-of-domain false positives dominate, reject or narrow the method. [Experiments](../proposals/03_experiment_and_falsification.md).

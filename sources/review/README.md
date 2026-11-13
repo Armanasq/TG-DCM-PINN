@@ -1,6 +1,6 @@
 # Research review · 2024–2026
 
-**Target:** TG-DCM-PINN six-axis, yaw-invariant tilt. **Cutoff:** 2026-11-13. **Corpus:** [32 papers](../papers/index.json), [12 pinned implementation reviews](../repositories/index.json). **Evidence class:** primary paper or abstract, static inspected code, analytical derivation, and separately marked reproduced results. Third-party metrics have **not** been reproduced.
+**Target:** TG-DCM-PINN six-axis, yaw-invariant tilt. **Cutoff:** 2026-11-13. **Corpus:** [38 papers](../papers/index.json), [12 pinned implementation reviews](../repositories/index.json). **Evidence class:** primary paper or abstract, static inspected code, analytical derivation, and separately marked reproduced results. Third-party metrics have **not** been reproduced.
 
 | Chapter | Research question |
 |---|---|
@@ -31,3 +31,5 @@
 **Workflow:** repair experiment integrity → run identical direct six-axis baselines → seeded ablations → device/motion-held-out stress → evaluate bounded S²/bias/uncertainty proposals. Do not equate a lower conditional loss, a stronger odometry ATE, or a more complex backbone with novel tilt estimation.
 
 **Re-run released-data sensitivity:** [standard-library verification script](../tools/verify_result_sensitivity.py); usage in [tools/README](../tools/README.md). Its computations do not substitute for original raw HDF5/checkpoint replay.
+
+**New research hypothesis:** [closure-constrained tilt method, prior-art challenge and falsification](../proposals/README.md). Proposed only; no external accuracy result or novel theorem is claimed.

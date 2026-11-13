@@ -12,3 +12,7 @@ From the repository root, with Python 3.10+ and no extra dependencies:
 **Interpretation:** cluster resampling of original independent motion/experiment identifiers is conditional on the frozen checkpoint and its preparation pipeline. Removing an alternate Caruso target file changes the *estimand*, not the trained network. The resulting bootstrap intervals are Monte Carlo approximations, not guaranteed byte-identical to the original NumPy RNG result. No hypothesis about why the paired Caruso scores differ can be established without comparing raw HDF5 arrays.
 
 **Verification status:** the script was run with a synthetic fixture; the real 559-row CSV was independently analyzed in-memory through GitHub and showed 18 Caruso pairs, 422 DIODEM entries, 86 motion groups and 11 experiments. The external source/weights were not loaded or executed in this environment. [Audit narrative](../review/09_second_pass_verification.md).
+
+## Motion-closure proof-of-concept
+
+Run python sources/tools/verify_motion_closure.py after installing NumPy. Checks exact dynamic interval cancellation, an invalid closure that defeats magnitude checks, and proper SO(3) coordinate-change covariance. Uses **exact relative orientations**, not integrated noisy gyroscope; no estimator or real-data accuracy is implied. [Derivation](../proposals/01_closure_constrained_tilt.md).

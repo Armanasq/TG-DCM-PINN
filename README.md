@@ -149,10 +149,12 @@ See [second-pass verification](sources/review/09_second_pass_verification.md).
 
 ## Literature research (2024–2026)
 
+**Research candidate:** [Closure-Constrained Tilt Observer](sources/proposals/README.md) uses bounded *interval* sensor-velocity change to derive gravity observations during dynamic acceleration. This is a proposed method with a synthetic validation and prior-art analysis, not a verified new architecture or real-data improvement. Standard preintegration, ZUPT and set-valued observers remain close prior art.
+
 The [technical literature review](sources/review/README.md) contains eight chapters covering
 architectures, design, mathematics, challenges, goals, limitations, future work,
 and a comprehensive source-critical synthesis. The [source corpus](sources/README.md)
-tracks 32 reviewed publications, 12 repository inspections, primary-source
+tracks 38 reviewed publications, 12 repository inspections, primary-source
 provenance, access limitations, and reproducibility plans. These materials are
 research notes and static code inspection, not independently reproduced paper
 benchmarks or changes to the released estimator.
