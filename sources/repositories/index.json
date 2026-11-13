@@ -1,0 +1,122 @@
+{
+  "schema_version": 1,
+  "inspected_at": "2026-11-13",
+  "access_method": "GitHub connector: remote file content inspected; local git clone unavailable",
+  "local_clone_status": "not_cloned",
+  "repositories": [
+    {
+      "repo": "Armanasq/TG-DCM-PINN",
+      "revision": "e27a43a1d3b6b4d3a82355414523e25bc97ca370",
+      "license": "Apache-2.0",
+      "files": [
+        "src/tg_dcm/losses.py",
+        "src/tg_dcm/so3.py",
+        "src/tg_dcm/train_impl.py",
+        "src/tg_dcm/evaluation.py",
+        "configs/model.yaml",
+        "docs/evaluation.md",
+        "README.md",
+        "training/summary.json"
+      ],
+      "implementation": "GRU 2x200, quaternion wxyz body->world. Tilt-only Charbonnier supervision and norm penalty, two gated auxiliary physics branches, EMA checkpoint. Source-level audit performed; trained results not recomputed.",
+      "caveat": "Data and checkpoint inference not executed. Regressions found by code inspection require targeted tests.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "chankyo123/ginio",
+      "revision": "6b97f178be1a253ef44e9a05ed17432b41c00287",
+      "license": "MIT",
+      "files": [
+        "airio/model/vn_gru.py",
+        "airio/model/vn_codenet.py",
+        "airio/model/test_a2_spectral_equivariance.py",
+        "docs/KNOWN_ISSUES.md"
+      ],
+      "implementation": "Vector-neuron linear/convolutional features and GRU; scalar gates from rotation-invariant feature norms; vector mean and spectral covariance output; numerical equivariance tests.",
+      "caveat": "The repository's own KNOWN_ISSUES.md disputes several camera-ready table cells and configuration labels; treat as an author-side erratum, not independently rerun measurements.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "RoyinaJayanth/EqNIO",
+      "revision": "97b7a60a5e5cc8f0132bba343c83de114211f827",
+      "license": "not verified (no root license present in inspected tree)",
+      "files": [
+        "TLIO-master/src/network/model_eq_VNCnn_frame_TLIO_v2_2vectors.py",
+        "TLIO-master/src/network/model_eq_o2.py",
+        "TLIO-master/src/network/losses.py"
+      ],
+      "implementation": "O(2)-equivariant vector/scalar channels, canonical frame modules, ResNet/TLIO integration, covariance-based probabilistic displacement loss.",
+      "caveat": "model_eq_o2.py is a transform assert demonstration, not the trainable estimator. TLIO-master/src/dataloader/LICENSE exists but does not establish the repository root license.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "Air-IO/Air-IO",
+      "revision": "7214e8a6ddee95ca07a64f01f1fa3e2f8f60df73",
+      "license": "BSD-3-Clause",
+      "files": [
+        "model/code.py",
+        "train_motion.py"
+      ],
+      "implementation": "Temporal CNNEncoder with Conv1d/BatchNorm/GELU/Dropout, variants with and without attitude features, body-frame motion and covariance predictions; training uses GT orientation in with-attitude branch.",
+      "caveat": "Distinguish attitude-assisted experiments from six-axis-only operation; reproduction requires datasets and checkpoint matching.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "sparolab/KISS-IMU",
+      "revision": "572bfbe29e90bcff55dc1ddf90205f071851f818",
+      "license": "BSD-3-Clause",
+      "files": [
+        "src/models/gmm.py",
+        "src/training/covweight.py",
+        "src/training/integrator.py"
+      ],
+      "implementation": "GaussianMixture for motion components, sample weights, EMA covariance weight controller, PyPose IMU integration.",
+      "caveat": "LiDAR supplies training pseudo-labels; runtime performance and reported numeric ATE not rerun.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "SJTU-ViSYS-team/AI-IO",
+      "revision": "5866134d5e9e20c082a32f06a59e99abb9049a15",
+      "license": "MIT",
+      "files": [
+        "src/learning/network/model.py",
+        "src/learning/network/losses.py"
+      ],
+      "implementation": "Temporal convolutions and IMUTransformerWithModality; diagonal log-standard-deviation probabilistic loss. Rotor speed is an extra input.",
+      "caveat": "Not a six-axis-only comparator. Paper results and runtime not reproduced.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "haleqiu/AirIMU",
+      "revision": "119fe7ce229e321b3890282909a183aefad61dfb",
+      "license": "BSD-3-Clause",
+      "files": [
+        "model/net.py",
+        "model/losses.py"
+      ],
+      "implementation": "PyPose IMUPreintegrator with covariance propagation; SO(3) logarithm residual loss and combined rotation/velocity/position objectives.",
+      "caveat": "Original AirIMU arXiv research began in 2023, so indexed as historical implementation baseline, not a qualifying 2024+ new paper.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    },
+    {
+      "repo": "superxslam/TartanIMU",
+      "revision": "8a8025000f85d2c6b0692b88e15c2c91e761f7d7",
+      "license": "Apache-2.0",
+      "files": [
+        "tartan_imu/model/backbones/lstm.py",
+        "tartan_imu/model/backbones/transformer.py"
+      ],
+      "implementation": "ResNetLSTMSeqNet and per-platform heads for dog/human/car/drone; Transformer builder is registered but raises NotImplementedError due intentionally unreleased core.",
+      "caveat": "Transformer results cannot be independently reproduced from the public release as inspected.",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
+    }
+  ]
+}
