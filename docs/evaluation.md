@@ -10,8 +10,8 @@ The metric is computed from the quaternion error and ignores yaw.
 
 Secondary metrics:
 
-- roll RMSE after heading alignment
-- pitch RMSE after heading alignment
+- roll RMSE after **full SO(3) ground-truth-derived initial correction** (source function is named align_heading, but does not restrict the correction to yaw)
+- pitch RMSE after the same ground-truth-derived full rotation (secondary, GT-calibrated; not independent tilt)
 
 Baselines:
 
@@ -65,3 +65,18 @@ variation are stored in `results/full_evaluation/tables/reliability.csv`.
 | `poster/evaluation_summary.*` | Four-panel A0-poster results figure |
 
 Figures are written in PNG, PDF, and SVG. The vector files retain editable text.
+
+
+## Second-pass independence and preparation sensitivity (2026-11-13)
+
+The tables above are retained as **historical published protocol results**, not retroactively changed model scores. The 137 standard sequence files contain 18 physical Caruso recordings twice, once as Caruso-Sassari and once as Caruso-Sassari_orig. The [current converter](../src/tg_dcm/prep/caruso.py) intends only quaternion antipodal sign continuity between these variants, yet all 18 pairs have differing released tilt RMSE and some unequal GT-valid frame counts. The source/data artifact mismatch needs a paired HDF5 field-by-field comparison.
+
+When the orig variants are omitted, the paired TG-minus-RIANN standard mean is **-0.043945° over 119 files**, and an independent 20k paired bootstrap gives an approximate **95% CI [-0.1004°, +0.0105°]**. Thus the earlier -0.090626° fixed-checkpoint improvement is **sensitive to duplicate-weighting**, not a universally resolved generalization advantage.
+
+DIODEM is not 86 independent recording sessions: its [primary 2025 descriptor](https://doi.org/10.1038/s41597-025-05468-w) states **11 continuous experiments** with 86 sub-motions and 422 assessed segment files. Experimental group/bootstrap choice must reflect this hierarchy. Independent experiment-cluster resampling of released errors gives an approximate [-0.433°, +0.021°] RIANN-difference CI, also crossing zero. Reference-frame and rigid/foam sensor provenance have not been recovered for the exported HDF5 files.
+
+[EuRoC-MAV prep](../src/tg_dcm/prep/euroc.py) subtracts reference-state **estimated gyro bias** before writing the benchmark inputs, and chooses a GT/gyro time offset. Therefore this is not an untouched raw gyro experiment. DIODEM timestamp increments are previous-interval indexed; a future gyro-transition loss would need to use forward dt. Per-window reset/live-weight validation also differs from full-stream stateful/EMA evaluation.
+
+The exact source trail, new research findings and unexecuted verification steps are recorded in [second-pass audit](../sources/review/09_second_pass_verification.md).
+
+**Independent check:** python sources/tools/verify_result_sensitivity.py --csv results/full_evaluation/tables/per_sequence.csv --reps 20000 --seed 7. This reproduces the published-data sensitivity with the documented bootstrap implementation, not the authors' original NumPy random sequence.

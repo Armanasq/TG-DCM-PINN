@@ -66,3 +66,13 @@ No training code was executed in this review. The numerical fact 0×NaN=NaN was 
 This is a source-backed targeted research synthesis, **not an exhaustive systematic or reproduced meta-analysis**. Some papers were read in full via open HTML/PDF text, others only via publisher preview. GitHub files were inspected at pinned revisions; local cloning was blocked by unavailable GitHub DNS in the execution environment and third-party training/checkpoint execution was not performed. A source-level bug report is separate from a confirmed change in benchmark statistics. Paper registries record access status; no paywalled content is represented as fully read.
 
 **Publication boundary:** at present a defensible claim is “target-gated tilt-oriented recurrent supervision with a reported modest standard-domain improvement.” Universal acceleration rejection, calibrated runtime confidence, exact full-system equivariance, strong OOD tails, independently reproduced external baselines and novelty of every component **are not demonstrated**.
+
+## Second-pass evidence downgrade: the most important omission
+
+The standard test is **not 137 independent sensor recordings**: Caruso-Sassari and Caruso-Sassari_orig reuse 18 underlying physical streams. The fixed-checkpoint mean gain versus RIANN changes from -0.090626 to -0.043945 degrees after retaining only the corrected versions; a new approximate sequence-bootstrap CI **[-0.1004,+0.0105]** includes zero. All 18 paired corrected/orig tilt metrics differ despite the current converter intending only quaternion sign correction; neither the discrepancy nor its effect on actual raw-data re-execution is resolved.
+
+The 422 DIODEM segment scores are nested within 86 motion groups within just **11 continuous experiments**. An experiment-cluster bootstrap sensitivity also includes zero. The optical reference, body/sensor frame transforms and rigid-versus-foam attachment are **not fully traceable** from the HDF5 test loader. This limits inferences about architecture-caused tail failures.
+
+EuRoC gyro is pre-corrected with **reference-state estimated** bias, which is not raw-IMU-only preparation. Validation selects live model weights under reset windows and pooled frame RMSE; released evaluation uses continuous state and EMA by default. Consequently previous statements describing the standard mean advantage as “resolved” **must be qualified by the duplicated-recording/selection protocol**.
+
+These are documented source/artifact observations, **not** independent model retraining or evidence that the target-gated mechanism lacks value. See [verification](09_second_pass_verification.md).

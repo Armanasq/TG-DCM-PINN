@@ -133,3 +133,11 @@ An IMU *physically moved* on a lever arm is not just a coordinate change: new ac
 | Covariance | Singular/large/small predicted variance, OOD residual | SPD, calibrated NLL/coverage/NEES |
 
 **Conclusion:** the strongest mathematical opportunity is a **well-specified observable-state update with explicit nuisance-state and uncertainty assumptions**. More auxiliary losses or more quaternion outputs do not change the measurement rank.
+
+## Second-pass mathematical invariant: antipodal labels cannot explain Caruso score changes
+
+For any nonzero quaternion q, \(R(-q)=R(q)\). Consequently a pure quaternion sign-continuity transform and positive normalization **must preserve** \(h(q)\), \(e_{\rm tilt}\), and valid-only per-sequence RMSE, provided original sensor inputs and valid-frame selection are unchanged. [Caruso converter](../../src/tg_dcm/prep/caruso.py) intends only such a transform, but the released [paired scores](../../results/full_evaluation/tables/per_sequence.csv) change for every one of 18 physical recordings, and GT-valid frame counts sometimes differ. This is **not an allowable mathematical consequence** of antipodal correction alone; it is an unlocalized source/validity/artifact disagreement requiring a paired HDF5 diff.
+
+For DIODEM timestamps, \(dt[k]=t_k-t_{k-1}\) but the current physics pair \(q_k\to q_{k+1}\) uses \(dt[k]\). The true forward increment is \(t_{k+1}-t_k=dt[k+1]\) for \(k\ge0\). This convention error becomes material only under irregular sample spacing. DIODEM is test-only in released TG training, so no past training effect is asserted. [Detailed audit](09_second_pass_verification.md).
+
+**Statistical object:** a bootstrap CI over 137 named files is not automatically a CI over 137 independent physical recordings. When 18 files are reprocessed copies of the others, the correct sampling unit is the raw sensor recording. Dropping the orig duplicates reduces the published TG-minus-RIANN mean from \(-0.090626^\circ\) to \(-0.043945^\circ\), with a new approximate paired-bootstrap interval \([-0.1004,+0.0105]^\circ\). This is a sensitivity test on published data, not a newly trained model.

@@ -61,3 +61,11 @@ Do not choose an architecture by matching model count alone. A modern BiLSTM [Di
 **Statistical design:** distinguish mean over segments, raw motions, datasets and frames. Resample DIODEM by original raw motion, not segment. A sequence bootstrap is conditional on fixed model weights; five or more independently trained seeds are required to estimate training variance. Select tuning only on validation, publish all negative results, and generate each table cell from one immutable checkpoint/config.
 
 **Decision:** freeze the experiment protocol, repair integrity, then reassess architecture rankings. A new model cannot receive scientific credit for correcting an evaluation artifact.
+
+## Second-pass design correction: dataset provenance is part of the observation model
+
+The [EuRoC preparer](../../src/tg_dcm/prep/euroc.py) subtracts a bias interpolated from the ground-truth/reference-state file before writing the six-axis benchmark signal. “Model receives six channels” and “only six-axis sensors were ever used to construct the input” are **not equivalent statements**. Freeze two tracks: truly raw gyroscope with independent calibration, and reference-estimated-bias gyro with explicitly declared teacher assistance.
+
+The [Caruso converter](../../src/tg_dcm/prep/caruso.py) writes each physical stream in both corrected and orig directories, changing only intended quaternion antipodal continuity. The 137-entry standard evaluation consequently contains 18 duplicate sensor recordings. The actual released paired results nevertheless differ in **all 18 corrected/orig tilt scores**; the paired HDF5 sources are therefore a required provenance-diff before any dataset-robustness claim.
+
+DIODEM consists of 11 continuous acquisition experiments; 86 motion groups and 422 segment scores are **nested observations**, not 422 or even 86 independent recording sessions. The [2025 descriptor](https://doi.org/10.1038/s41597-025-05468-w) supplies rigid/foam attachment and reference-frame alignment details missing from the derived HDF5 ingest contract. Test both raw-motion- and experiment-session-level clustered uncertainty. [Source and numerical evidence](09_second_pass_verification.md).

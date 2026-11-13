@@ -55,3 +55,16 @@ These extend the preceding source-level findings. No changed benchmark numbers a
 
 **Evidence standard:** static code-path finding != observed numerical bias. Required follow-up: regression tests, raw-data incidence counts and per-sequence before/after paired effect estimates. The previous single-seed aggregate result cannot attribute a gain to a particular component.
 
+
+
+## Second-pass target audit: source, artifact and statistical mismatch
+
+**Caruso duplicated physical streams:** [prep/caruso.py](../../src/tg_dcm/prep/caruso.py) writes two copies of the same raw sensor recording distinguished by target quaternion sign-normalization/continuity. They appear as 36 independent test entries but represent 18 physical recordings. The released corrected/orig per-sequence scores differ unexpectedly (mean absolute TG RMSE change 0.14576°, with some GT-valid count changes) despite antipodal invariance. This requires a HDF5 and historical converter revision diff before model performance is attributed.
+
+**EuRoC reference assisted:** [prep/euroc.py](../../src/tg_dcm/prep/euroc.py) reads estimated bias b_w_RS_S from reference-state CSV and subtracts it from each gyro input, and aligns GT via a gyro-derived time offset. The 6-axis model input is not raw untreated measurement.
+
+**DIODEM:** the [primary Scientific Data 2025 paper](https://doi.org/10.1038/s41597-025-05468-w) has 11 continuous experiments, foam/rigid sensors and sensor-body/earth-optical alignment. The repository loads already prepared HDF5 without disclosing the converter's mount/calibration metadata. For irregular sample spacing, DIODEM dt[k] denotes the previous interval whereas target physics uses it for q[k]->q[k+1]. DIODEM is test-only in released training: the physics-loss dt issue affects prospective train/adaptation more directly than current released evaluation.
+
+**Checkpoint:** validation computes reset-window pooled frame RMSE using live network weights, while release evaluation uses state carried across whole recordings and EMA weights by default. Identical checkpoint selection and inference metrics have not been established.
+
+**Published sensitivity:** remove 18 Caruso orig variants and the paired standard mean effect becomes -0.043945°, approximate CI [-0.1004,+0.0105], crossing 0. DIODEM experiment-cluster interval also crosses 0; no robust all-domain superiority established. [Full source and computation](../review/09_second_pass_verification.md).

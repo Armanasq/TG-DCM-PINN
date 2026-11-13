@@ -1,6 +1,6 @@
 # A Large-Scale Empirical Study of Deep Learning for MEMS Gyroscope Bias Estimation
 
-**Authors:** Chia-Tung Chung; Hsiu-Chi Tsai (paper title page; repository landing metadata lists reversed order). **Year:** 2026. **Venue:** engrXiv 2026 preprint; not peer reviewed. **Primary source:** https://doi.org/10.31224/7144. **DOI:** https://doi.org/10.31224/7144. **Evidence accessed:** full_text_via_scholarly_connector_primary_pdf_index. **External benchmark re-executed:** no.
+**Authors:** Hsiu-Chi Tsai; Chia-Tung Chung (EngrXiv metadata; the extracted PDF title page reverses order). **Year:** 2026. **Venue:** engrXiv 2026 preprint; not peer reviewed. **Primary source:** https://doi.org/10.31224/7144. **DOI:** https://doi.org/10.31224/7144. **Evidence accessed:** full_text_via_scholarly_connector_primary_pdf_index. **External benchmark re-executed:** no.
 
 ## Why this research was necessary
 

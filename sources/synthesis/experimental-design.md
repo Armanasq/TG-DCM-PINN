@@ -70,3 +70,15 @@ The source-level audit documents **possible metric effects**, not measured corre
 
 The [2025 RSS continuous bias NODE](https://arxiv.org/html/2504.09495) and [2026 empirical bias preprint](https://doi.org/10.31224/7144) strengthen the requirement to control bias-initialization provenance and label preprocessing independently of network family.
 
+
+
+## Second-pass required controls before any novelty experiment
+
+1. **Data duplicates:** pair Caruso corrected/orig physical streams by recording ID; compare acc, gyro, dt, GT and valid masks; select one canonical target or cluster at physical recording. Report original 137-file and recording-balanced 119-file sensitivity.
+2. **EuRoC observation budgets:** distinguish raw gyro from ground-truth-reference-estimated gyro-bias-corrected data; record GT/IMU time-offset calibration and prohibit test-output-driven realignment.
+3. **DIODEM session dependency:** nested segments -> raw motion -> experiment (11 continuous sessions). Report both motion and session clustered effects and mount/segment calibration. The source-to-HDF5 converter is currently untraceable.
+4. **Validation/inference identity:** window-reset vs continuous-hidden state, live vs EMA weights, full-sequence vs pooled per-window tilt metric, same cold start and causal output timestamps.
+5. **Direct comparator:** reproduce author RIANN training reimplementation separately from official ONNX, same target quality and data split. Compare all methods at identical 6-axis/time information.
+6. **Revised acceptance:** the old standard CI excludes zero but a valid deduplication CI includes zero. A robust improvement claim needs an independent-recording estimand, multiseed variation and held-out-device validation without a worsening DIODEM p95.
+
+[Recomputed sensitivities and exact source links](../review/09_second_pass_verification.md).

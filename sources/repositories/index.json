@@ -164,6 +164,23 @@
       "caveat": "No local clone/solver execution; training uses pose GT and approximate bias initialization from pose increments; TUMVI training uses raw IMU with synthesized calibrated-bag timestamps per repository README. Check physical clock/time effects and OOD calibration.",
       "inspected_at": "2026-11-13",
       "local_clone": false
+    },
+    {
+      "repo": "daniel-om-weber/riann_dev",
+      "revision": "435274141c08ab318c01be904de9754943b4feed",
+      "license": "Apache-2.0 (verified LICENSE)",
+      "files": [
+        "train.py",
+        "riann/data.py",
+        "riann/prep/euroc.py",
+        "riann/prep/_common.py",
+        "scripts/validate_vqf.py",
+        "scripts/compare_hdf5.py"
+      ],
+      "implementation": "2026 author-maintained RIANN training reimplementation: 2-layer GRU, Ranger, fixed input normalization, tilt loss, bias/noise augmentation, Myon/TUM-VI train/validation partition, 50–500-Hz resampled windows. EuRoC preparer explicitly subtracts estimated gyro bias from state_groundtruth_estimate0. Prepared HDF5s are Git LFS pointers; binary training data not downloaded.",
+      "caveat": "README explicitly calls this a reimplementation because original training code was lost, not the original RIANN training experiment. No checkpoint or HDF5 dataset executed; existing official ONNX model is separate. Original RIANN citation DOI 10.3390/ai2030028 (2021).",
+      "inspected_at": "2026-11-13",
+      "local_clone": false
     }
   ]
 }

@@ -81,3 +81,17 @@
 | 6 | Exact paper-to-commit/data/checkpoint/metric reconstruction | Any headline result lacks a generating artifact |
 
 **Scientific contribution threshold:** establish a mechanism with narrower assumptions than a generic end-to-end model, prove a property or demonstrate its controlled effect, publish a counterexample/failure boundary, and make every number independently regenerable. Combining existing physics, gating and equivariance blocks without these controls is not novelty.
+
+## New prerequisite: falsify the published baseline before proposing another architecture
+
+**F0 — Caruso identity audit:** compare exact frame-aligned arrays and SHA256 for 18 corrected/orig pairs. Since \(q\mapsto\pm q\) preserves tilt, any remaining difference requires an explicit change to target validity, frame conversion, clock, sensor input or artifact version. Recompute independent-recording CIs.
+
+**F1 — canonical raw benchmark:** evaluate EuRoC twice (raw vs reference-bias-debiased gyro), as *two distinct measurement budgets*. Cross-dataset aggregation must never silently mix them when supporting unassisted deployment.
+
+**F2 — DIODEM causal decomposition:** recover original 11-session identifiers and published rigid/nonrigid flags. Trace each 422-entry HDF5 to original IMU and optical marker records, sensor-to-body transform, sync calibration and excluded-questionable policy. Quantify how much p95 error is explained by attachment type versus actual estimator sensitivity.
+
+**F3 — own-estimator selection test:** compare live vs EMA selected at the same full-sequence streaming metric, then measure resets, warm-up and near-unobservable motion.
+
+**F4 — prior-art differentiation:** [RSS 2025 bias dynamics](https://doi.org/10.15607/RSS.2025.XXI.009), [2025 optical-flow body-gravity observer](https://arxiv.org/abs/2508.21163), [2026 reduced gravity observer](https://arxiv.org/abs/2609.26612), and [2026 nonlinear geometric VIO observer](https://arxiv.org/abs/2601.07156) already establish bias dynamics and body-gravity geometric state under their own sensor assumptions. A new six-axis S² observer needs a specific novel update/uncertainty/identifiability result and independent positive tests, not a new name.
+
+Prioritize F0–F3 over adding Transformer, MoE or more loss terms. [Evidence and sensitivity analysis](09_second_pass_verification.md).

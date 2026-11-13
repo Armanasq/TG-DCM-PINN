@@ -90,3 +90,15 @@ Report all three where claims concern deployment. Use original raw motion as the
 | M5 | Source/checkpoint/data hashes and machine-reconstructed tables | Is the claim reproducible? |
 
 **Success is not “best average.”** It is a **replicable improvement on a preregistered metric without an unacceptable DIODEM tail regression**, with known applicability conditions, calibrated uncertainty if claimed, and a coherent runtime sensor/latency contract.
+
+## Required revision to success criteria
+
+**G0a — physical-recording deduplication:** compute and publish independent-sensor-stream identifiers, identify the corrected/orig Caruso pairs, and rerun the standard primary metric using one canonical target per recording. The released -0.091-degree paired advantage becomes -0.044 degrees under the drop-orig sensitivity analysis, with a CI that includes zero. A positive publishable mean improvement must survive *at least one preregistered recording-balanced* protocol.
+
+**G0b — source-input isolation:** separate EuRoC raw-gyro evaluation from reference-bias-corrected evaluation. Track the source of the bias and optical-gyro synchronization parameters and label any teacher-aided preprocessing.
+
+**G0c — nested DIODEM evidence:** publish metrics at segment, raw-motion and original experiment levels (11 continuous source experiments). Verify rigid/nonrigid IMU selection, body/earth frame calibration and optical GT validity. Tail-risk significance must use the appropriate experimental unit.
+
+**G0d — selection consistency:** choose checkpoints with continuous-state validation under the intended inference weights (EMA or live), matched runtime initialization, and a fixed warm-up policy.
+
+No hypothesis should be labeled demonstrated until these preregistered protocol gates pass. Full calculation and source references: [second-pass audit](09_second_pass_verification.md).

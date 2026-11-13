@@ -135,12 +135,24 @@ vector figures are under [`results/full_evaluation/`](results/full_evaluation/).
 The protocol and claims boundary are documented in
 [`docs/evaluation.md`](docs/evaluation.md).
 
+**Evaluation qualification (second-pass source review).** The 137-file standard
+set contains 18 repeated Caruso sensor recordings in corrected and original
+reference variants. Removing the original variants changes the TG-minus-RIANN
+paired mean from -0.091° to -0.044°, with an independent approximate 95%
+sensitivity-bootstrap interval [-0.100°, +0.011°]. The released interval
+excluding zero is **not robust to this deduplication**. The DIODEM 422 segments
+come from 86 motions in 11 continuous experiments, and EuRoC uses gyro bias
+estimated in its reference-state file during preprocessing. The current
+Caruso paired HDF5 generation/artifact mismatch is unresolved. These
+limitations qualify the **evidence**, not the model's untested mechanism.
+See [second-pass verification](sources/review/09_second_pass_verification.md).
+
 ## Literature research (2024–2026)
 
 The [technical literature review](sources/review/README.md) contains eight chapters covering
 architectures, design, mathematics, challenges, goals, limitations, future work,
 and a comprehensive source-critical synthesis. The [source corpus](sources/README.md)
-tracks 28 reviewed publications, 11 repository inspections, primary-source
+tracks 32 reviewed publications, 12 repository inspections, primary-source
 provenance, access limitations, and reproducibility plans. These materials are
 research notes and static code inspection, not independently reproduced paper
 benchmarks or changes to the released estimator.

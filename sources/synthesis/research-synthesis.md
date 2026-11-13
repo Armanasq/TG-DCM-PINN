@@ -55,3 +55,12 @@ TG-DCM's physics-informed loss, quaternion/vertical geometry, gating and recurre
 ## 6. Decision order
 
 First fix and regression-test preprocessing/temporal integrity. Next add reliable direct RAESKF and Ding-style matched-latency baselines. Then run factorial gate/physics ablations with OOD and clustered confidence intervals. Only after those checks evaluate the more expensive S^2-geometry/equivariant-uncertainty architecture; report counterexamples and failure regimes.
+
+
+## Second-pass corrected synthesis: attribution and source independence
+
+The standard 137-file set duplicates 18 Caruso physical sensor streams across two target-processing variants. Their published paired error changes contradict *pure antipodal sign correction* under the current converter. Removing the orig variants changes TG-minus-RIANN mean from -0.090626° to -0.043945° and paired-bootstrap CI to approximately [-0.1004°, +0.0105°]. This overturns an unqualified claim that the standard-domain mean advantage is statistically resolved independently of how raw recordings are weighted.
+
+The EuRoC preparer uses externally estimated gyro bias from the reference-state CSV; DIODEM exports lack sufficiently documented 11-session/rigid-foam calibration lineage; validator selects reset-window live weights while release uses streaming EMA. These are **method/protocol provenance defects or gaps**, not a proof the physical model is wrong. The [2025 DIODEM original paper](https://doi.org/10.1038/s41597-025-05468-w), [RIANN 2026 training reimplementation](https://github.com/daniel-om-weber/riann_dev), [2025 optical-flow gravity observer](https://arxiv.org/abs/2508.21163) and [2026 reduced-order gravity observer](https://arxiv.org/abs/2609.26612) close important primary-source omissions.
+
+**Revised contribution boundary:** TG-DCM currently has a differentiated target-gated **training formulation** and descriptive numerical reports, but the architecture and body-gravity representation are prior art; component causality, robust cross-device gains, DIODEM superiority and standard significance under independent physical-recording weighting are **not yet established**. [All findings, formulas and tests](../review/09_second_pass_verification.md).

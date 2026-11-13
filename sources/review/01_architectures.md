@@ -60,3 +60,11 @@ A second [2026 empirical preprint](https://doi.org/10.31224/7144) reports 2,811 
 6. **End-to-end coordinate-equivariance tests.** Add only after a strong augmentation baseline and exact SO(3) property tests; physical remount is a separate OOD test.
 
 **Stop criterion:** if a candidate's gain vanishes when delay, truth alignment, sensor channels and data splitting are equalized—or if DIODEM p95 regresses—report a trade-off or null result, not a new best method.
+
+## Second-pass architecture attribution and geometric prior art
+
+**The RIANN ancestry matters.** [Weber's RIANN training reimplementation](https://github.com/daniel-om-weber/riann_dev/tree/435274141c08ab318c01be904de9754943b4feed) has the same broad 2-layer GRU, Myon/TUM-VI split, bias/noise augmentation, rate resampling and Ranger design. It is not the originally released RIANN training run—the author explicitly labels it a reimplementation. It substantially narrows the claim of novelty: TG-DCM must isolate what **target-gated loss** changes beyond a matched re-trained RIANN, not claim the GRU, training policy or split.
+
+**The S² gravity state is also prior art.** [Bouazza et al. 2025](https://arxiv.org/abs/2508.21163), [Abi et al. 2026](https://arxiv.org/abs/2609.26612) and [Boughellaba et al. 2026](https://arxiv.org/abs/2601.07156) construct geometric observers with body gravity and velocity. Their strong convergence conditions depend on visual or optical-flow measurements; do not transfer those guarantees to an unassisted six-axis estimator. A future contribution must be in its measurable update, uncertainty/error model, an additional proven property or held-out performance—not the gravity-state representation alone.
+
+**Correct direct baseline priority:** official RIANN ONNX plus independently reproduced RIANN training reimplementation, six-axis ESKF, VQF without future backfill, and TG-DCM at the **same** data, initialization and delay. See [second-pass findings](09_second_pass_verification.md).

@@ -1,6 +1,6 @@
 # Research review · 2024–2026
 
-**Target:** TG-DCM-PINN six-axis, yaw-invariant tilt. **Cutoff:** 2026-11-13. **Corpus:** [28 papers](../papers/index.json), [11 pinned implementation reviews](../repositories/index.json). **Evidence class:** primary paper or abstract, static inspected code, analytical derivation, and separately marked reproduced results. Third-party metrics have **not** been reproduced.
+**Target:** TG-DCM-PINN six-axis, yaw-invariant tilt. **Cutoff:** 2026-11-13. **Corpus:** [32 papers](../papers/index.json), [12 pinned implementation reviews](../repositories/index.json). **Evidence class:** primary paper or abstract, static inspected code, analytical derivation, and separately marked reproduced results. Third-party metrics have **not** been reproduced.
 
 | Chapter | Research question |
 |---|---|
@@ -12,6 +12,7 @@
 | [06 · Limitations](06_limitations.md) | What is mathematically impossible, source-level hazardous, or not experimentally verified? |
 | [07 · Future work](07_future_works.md) | Which mechanism-specific hypotheses deserve a controlled trial, and when should they be rejected? |
 | [08 · Critical literature review](08_literature_review.md) | How do 2024–2026 papers actually work, what assumptions buy their reported gains, and what does the code release support? |
+| [Second-pass verification](09_second_pass_verification.md) | Which original claims fail provenance/deduplication sensitivity, and what remains unverified? |
 
 ## Non-obvious findings
 
@@ -28,3 +29,5 @@
 [Target source findings](../implementation/target-audit.md) · [External code inspection](../implementation/external-code-audit.md) · [Research experiment protocol](../synthesis/experimental-design.md) · [Access and provenance rules](../methodology.md) · [Acquisition script](../tools/acquire.py).
 
 **Workflow:** repair experiment integrity → run identical direct six-axis baselines → seeded ablations → device/motion-held-out stress → evaluate bounded S²/bias/uncertainty proposals. Do not equate a lower conditional loss, a stronger odometry ATE, or a more complex backbone with novel tilt estimation.
+
+**Re-run released-data sensitivity:** [standard-library verification script](../tools/verify_result_sensitivity.py); usage in [tools/README](../tools/README.md). Its computations do not substitute for original raw HDF5/checkpoint replay.

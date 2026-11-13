@@ -60,3 +60,13 @@ The standard split's reported paired mean difference against RIANN, -0.091° wit
 ## 8. Research-risk decision
 
 A 2024–2026 survey can produce a visually impressive architecture taxonomy without reducing the error budget. The defensible order is: **correct evaluation semantics → establish baseline truth → identify tail failures → test a mechanistic correction → benchmark at matched information budget → claim novelty only from demonstrated residual improvements.** See [goals](05_goals.md), [limits](06_limitations.md), [future hypotheses](07_future_works.md).
+
+## Second-pass risk reprioritization
+
+1. **P0 — Independence and identity of test samples:** the 137 standard files include 18 duplicated physical Caruso streams; a reasonable deduplication makes the CI for the standard mean effect cross zero. Investigate source artifacts, not just a new architecture.
+2. **P0 — Reference-assisted inputs:** EuRoC bias estimates from its reference-state file are subtracted from gyro before benchmarking. This is not an untouched raw-six-axis test and changes the deployment meaning of accuracy.
+3. **P0 — Alignment and motion artifacts:** the [DIODEM 2025 source](https://doi.org/10.1038/s41597-025-05468-w) describes rigid/foam mounts, 11 continuous sessions, multiple frame transforms and broad-band nonrigid disturbances. The HDF5 test pipeline lacks enough conversion provenance to separate these causes.
+4. **P1 — Validation objective mismatch:** the checkpoint is selected from independent reset validation windows using live weights, while the evaluation processes whole sequences with hidden-state carry and EMA weights by default.
+5. **P1 — Domain-specific negative results:** mean paired TG-RIANN differences are +0.13016 degrees on EuRoC (zero wins in six sequences) and +0.07961 degrees on OxIOD (29.6% wins). An aggregate gain is not universal OOD improvement.
+
+All numbers are from [released evaluation tables](../../results/full_evaluation/tables/per_dataset.csv) and independently checked CSV aggregation. See [verification details](09_second_pass_verification.md).
